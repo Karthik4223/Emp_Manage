@@ -1,0 +1,365 @@
+.App {
+  text-align: center;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: whitesmoke;
+  padding: 5px;
+  z-index: 100;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1; 
+  margin-top: 60px; 
+  margin-bottom: 60px; 
+}
+
+.navbar {
+  position: fixed;
+  top: 65px; 
+  left: 0;
+  width: 200px; 
+  height: calc(100vh - 138px);
+  background-color: white;
+  overflow-y: scroll;
+  padding: 10px;
+  z-index: 90; 
+}
+
+.navbar-button.active {
+  background-color: #f0e3e3;
+  font-weight: bold;
+}
+
+
+.content {
+  flex: 1; 
+  padding: 20px;
+  margin-left: 200px;
+  overflow-y: auto; 
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background-color: rgb(212, 210, 210);
+  padding: 5px;
+  z-index: 100; 
+}
+
+.navbar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.navbar-button {
+  background: none;
+  border: none;
+  color:black;
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.3s;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  width: 100%;
+  text-align: left;   
+}
+
+
+.navbar-button:hover {
+  color: rgb(235, 122, 150);
+}
+
+
+/* create employee */
+
+.create-employee{
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #66afe9;
+  outline: none;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}   
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #66afe9;
+  outline: none;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.form-group-button{
+  align-items: center;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.form-group-button button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.form-group-button button:hover {
+  background-color: #218838;
+}
+
+/* employee/employeeRequest/rights details */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.filter-container select {
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.filter-button{
+  top:0;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 900px;
+}
+
+
+.employee-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.employee-table-header {
+  background-color: #f2f2f2;
+}
+
+.employee-table-row.header-row {
+  border-bottom: 1px solid #ddd;
+}
+
+.employee-table-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.employee-table-row.data-row:hover {
+  background-color: #f5f5f5;
+}
+
+
+.employee-table-header th,
+.employee-table-row td {
+  padding: 12px 15px;
+  text-align: center;
+}
+
+.employee-table-header th {
+  border-bottom: 2px solid #ddd;
+  font-weight: medium;
+}
+
+.action-column-cell {   
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.action-button-approve {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-button-approve:hover {
+  background-color: #0056b3;
+}
+
+.action-button-reject {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-button-reject:hover {
+  background-color: #c82333;
+}
+
+.action-column-cell button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.action-button-edit-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-button-edit-button:hover {
+  background-color: #0056b3;
+}
+
+.action-button-status-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.action-button-status-button:hover {
+  background-color: #c82333;
+}
+
+/* create right*/
+
+.create-right-form{
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* rolemapping */
+
+.available-rights-mapping-container, .assigned-rights-mapping-container {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin: 0 10px;
+  max-width: 300px;
+}
+
+.available-roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.assigned-roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mapping-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.mapping-buttons button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 50px;
+  text-align: center;
+}
+
+.rights-mapping-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}

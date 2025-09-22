@@ -1,0 +1,106 @@
+package com.example.employee.config;
+
+import javax.jms.ConnectionFactory;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.connection.SingleConnectionFactory;
+import org.springframework.jms.core.JmsTemplate;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+@Configuration
+public class Configurations {
+	
+	private static final String SOLR_URL= "http://localhost:8983/solr";
+	
+	private String brokerUrl = "tcp://localhost:61616";
+	
+		@Bean
+	public SolrClient solrClient() {
+		return new HttpSolrClient.Builder(SOLR_URL).build();
+	}
+	
+	@Bean
+	public ConnectionFactory connectionFactory() {
+		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
+		activeMQConnectionFactory.setBrokerURL(brokerUrl);
+		return activeMQConnectionFactory;
+	}
+
+	@Bean
+	public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
+		JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+		jmsTemplate.setPubSubDomain(false);
+		return jmsTemplate;
+	}
+	
+	@Bean
+	public SingleConnectionFactory singleConnectionFactory(ConnectionFactory connectionFactory) {
+	    SingleConnectionFactory scf = new SingleConnectionFactory();
+	    scf.setTargetConnectionFactory(connectionFactory);
+	    return scf;
+	}
+
+	
+//	@Bean
+//	public DefaultJmsListenerContainerFactory topicListenerFactory(SingleConnectionFactory singleConnectionFactory) {
+//	    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+//	    factory.setConnectionFactory(singleConnectionFactory);
+//	    factory.setPubSubDomain(true);
+//	    return factory;
+//	}
+	
+	@Bean
+	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(ConnectionFactory connectionFactory) {
+	    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+	    factory.setConnectionFactory(connectionFactory);
+	    factory.setPubSubDomain(false); 
+	    return factory;
+	}
+	
+	
+	@Bean
+    public ObjectMapper redisObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); 
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); 
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        return mapper;
+    }
+	
+	@Bean
+	public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory connectionFactory,ObjectMapper redisObjectMapper){
+		RedisTemplate<String,Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+		
+	    StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
+		GenericJackson2JsonRedisSerializer jacksonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
+        
+		template.setKeySerializer(stringSerializer);
+
+	    template.setHashKeySerializer(stringSerializer);     
+	    template.setHashValueSerializer(jacksonSerializer);  
+
+	    template.setValueSerializer(jacksonSerializer);      
+
+		template.afterPropertiesSet();
+		
+		return template;
+	}
+	
+	
+}
