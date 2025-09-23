@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,10 +44,13 @@ public class RightsServiceImpl implements RightsService{
 				return rightsRepoRedis.addRights(rightsRepo.getRightById(rights.getRightCode()));
 			}
 			return res;
-		} catch (EmployeeException e) {
+		}catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(),e);
+	        throw new EmployeeException("A Right with same name already found try with some other");
+		}catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
-	    } catch (Exception e) {
+	    }catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        throw new EmployeeException("Failed to add Rights");
 	    }

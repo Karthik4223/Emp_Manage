@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function SearchEmployee({ onNavigate }) {
   const [employeeSearchData, setEmployeeSearchData] = useState({
@@ -16,6 +20,18 @@ function SearchEmployee({ onNavigate }) {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
   const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(() => {
+    if (message) {
+      toast(message, { type: messageType === 'error' ? 'error' : 'success' });
+  
+      const timeout = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+  
+      return () => clearTimeout(timeout);
+    }
+  }, [message, messageType]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,7 +117,7 @@ function SearchEmployee({ onNavigate }) {
       <div className="create-employee">
         <h3 className="form-title">Search Employee</h3>
         <form onSubmit={handleSubmit} className="employee-form">
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Email:</label>
             <input
               type="text"
@@ -114,7 +130,7 @@ function SearchEmployee({ onNavigate }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Name:</label>
             <input
               type="text"
@@ -127,7 +143,7 @@ function SearchEmployee({ onNavigate }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Phone Number:</label>
             <input
               type="text"
@@ -140,7 +156,7 @@ function SearchEmployee({ onNavigate }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Gender:</label>
             <select
               className="form-control"
@@ -154,7 +170,7 @@ function SearchEmployee({ onNavigate }) {
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Department:</label>
             <select
               className="form-control"
@@ -172,7 +188,7 @@ function SearchEmployee({ onNavigate }) {
             </select>
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Search Key:</label>
             <input
               type="text"
@@ -185,7 +201,7 @@ function SearchEmployee({ onNavigate }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="custom-form-group">
             <label>Employee Status:</label>
             <select
               className="form-control"
@@ -199,22 +215,12 @@ function SearchEmployee({ onNavigate }) {
             </select>
           </div>
 
-          <div className="form-group-button">
+          <div className="custom-form-group-button">
             <button type="submit">Search</button>
           </div>
         </form>
 
-        {message && (
-          <div
-            style={{
-              color: messageType === "error" ? "red" : "green",
-              marginTop: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            {message}
-          </div>
-        )}
+        <ToastContainer position="top-right" />
       </div>
 
       {searchResults.length > 0 && (

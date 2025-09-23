@@ -6,6 +6,7 @@ import java.util.List;
 import javax.jms.MapMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,18 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
 			employeeRequest.setCreatedBy("ADMIN");
 			return employeeRequestRepo.addEmployeeRequest(employeeRequest);
+		}catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(),e);
+	        Throwable rootCause = e.getRootCause();
+	        String message = rootCause != null ? rootCause.getMessage() : e.getMessage();
+	        String column = "unknown column";
+	        if (message != null) {
+	            int idx = message.indexOf("for key");
+	            if (idx != -1) {
+	                column = message.substring(idx + 8).replaceAll("['`]", "").trim();
+	            }
+	        }
+	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
 		}catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;

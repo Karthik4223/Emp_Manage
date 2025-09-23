@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function RightsMapping() {
   const { empCode } = useParams();
 
@@ -12,6 +15,20 @@ function RightsMapping() {
 
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
+
+
+  useEffect(() => {
+    if (message) {
+      toast(message, { type: messageType === 'error' ? 'error' : 'success' });
+  
+      const timeout = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+  
+      return () => clearTimeout(timeout);
+    }
+  }, [message, messageType]);
+  
 
   useEffect(() => {
     const fetchRights = async () => {
@@ -147,21 +164,10 @@ function RightsMapping() {
 
         </div>
       </div>
+      
+      <ToastContainer position="top-right"/>
 
-      {message && (
-        <div
-          className="error"
-          style={{
-            color: messageType === 'error' ? 'red' : 'green',
-            marginBottom: '10px',
-            marginTop: '10px',
-          }}
-        >
-          {message}
-        </div>
-      )}
-
-      <div className="form-group-button">
+      <div className="custom-form-group-button">
         <button onClick={handleSubmit}>Assign Rights</button>
       </div>
     </div>

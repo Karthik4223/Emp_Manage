@@ -1,10 +1,27 @@
 import React from "react";
 import { useState,useEffect } from "react";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+
 function Rights() {
   const [rights, setRights] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
+
+  useEffect(() => {
+    if (message) {
+      toast(message, { type: messageType === 'error' ? 'error' : 'success' });
+
+      const timeout = setTimeout(() => {
+        setMessage('');
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [message, messageType]);
 
   useEffect(() => {
     fetchRights();
@@ -99,11 +116,8 @@ function Rights() {
         </tbody>
       </table>
 
-      {message && (
-        <div className="error" style={ messageType === 'error' ? { color: 'red', marginBottom: '10px', marginTop: '10px' } : { color: 'green', marginBottom: '10px', marginTop: '10px' }}>
-          {message}
-        </div>
-      )}
+      <ToastContainer position="top-right"/>
+
     </div>
   );
 }

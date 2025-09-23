@@ -200,6 +200,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 
 	    SolrQuery query = new SolrQuery();
 	    query.setQuery("*:*");
+	    query.setRows(1000000);
 	    query.setSort("emp_code", SolrQuery.ORDER.asc);
 
 
@@ -223,7 +224,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 	    String solrCollection = "Employees";
 
 	    try {
-	        SolrDocument doc = solrClient.getById(solrCollection, empCode);
+	        SolrDocument doc = solrClient.query(solrCollection, new SolrQuery("emp_code:\"" + empCode + "\"")).getResults().stream().findFirst().orElse(null);
 
 	        if (doc == null) {
 	            return null; 
@@ -245,7 +246,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         if (criteria.getEmployeeNames() != null && !criteria.getEmployeeNames().isEmpty()) {
         	
             String namesQuery = criteria.getEmployeeNames().stream()
-						                .map(name -> "name:\"" + name + "\"")
+						                .map(name -> "name:*" + name + "*")
 						                .collect(Collectors.joining(" OR "));
             
             query.add("(" + namesQuery + ")");
@@ -254,7 +255,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         if (criteria.getEmployeeDepartment() != null && !criteria.getEmployeeDepartment().isEmpty()) {
         	
             String depQuery = criteria.getEmployeeDepartment().stream()
-						                .map(department -> "department:\"" + department + "\"")
+						                .map(department -> "department:*" + department + "*")
 						                .collect(Collectors.joining(" OR "));
             
             query.add("(" + depQuery + ")");
@@ -262,14 +263,14 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         
         if (criteria.getEmployeeStatus() != null) {
         	
-            String statusQuery = "emp_status:\"" + criteria.getEmployeeStatus().getCode() + "\"";
+            String statusQuery = "emp_status:*" + criteria.getEmployeeStatus().getCode() + "*";
             query.add("(" + statusQuery + ")");
         }
         
         if (criteria.getEmployeeEmail() != null && !criteria.getEmployeeEmail().isEmpty()) {
         	
             String emailQuery = criteria.getEmployeeEmail().stream()
-						                .map(email -> "email:\"" + email + "\"")
+						                .map(email -> "email:*" + email + "*")
 						                .collect(Collectors.joining(" OR "));
             
             query.add("(" + emailQuery + ")");
@@ -278,7 +279,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         if (criteria.getEmployeeCode() != null && !criteria.getEmployeeCode().isEmpty()) {
         	
             String empCodeQuery = criteria.getEmployeeCode().stream()
-						                .map(emp_code -> "emp_code:\"" + emp_code + "\"")
+						                .map(emp_code -> "emp_code:*" + emp_code + "*")
 						                .collect(Collectors.joining(" OR "));
             
             query.add("(" + empCodeQuery + ")");
@@ -288,7 +289,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         if (criteria.getEmployeePhoneNumber() != null && !criteria.getEmployeePhoneNumber().isEmpty()) {
         	
             String phoneNumberQuery = criteria.getEmployeePhoneNumber().stream()
-						                .map(phone_number -> "phone_number:\"" + phone_number + "\"")
+						                .map(phone_number -> "phone_number:*" + phone_number + "*")
 						                .collect(Collectors.joining(" OR "));
             
             query.add("(" + phoneNumberQuery + ")");
@@ -313,6 +314,7 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
         String queryString =  String.join(" OR ", query);
 
         solrQuery.setQuery(queryString);
+        solrQuery.setRows(1000);
 
         QueryResponse response = null;
 		try {

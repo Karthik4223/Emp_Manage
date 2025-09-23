@@ -44,8 +44,9 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 
 	@Override
 	public List<EmployeeRights> getAllEmployeeRights() {
-		String sqlString = "Select er.emp_code,er.right_code,r.right_name,er.createdDateTime,er.createdBy,er.updatedBy from EmployeeRights er "
-				+ " JOIN Rights r on er.right_code = r.right_code";
+		String sqlString = "SELECT er.emp_code, er.right_code, r.right_name, er.createdDateTime, er.createdBy, er.updatedBy " +
+                "FROM EmployeeRights er " +
+                "JOIN Rights r ON er.right_code = r.right_code";
 		
 	    List<EmployeeRights> empRights = namedParameterJdbcTemplate.query(sqlString, new EmployeeRightsRowMapper());
 
@@ -60,6 +61,7 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 	        } else {
 	            EmployeeRights existing = empRightsMap.get(empCode);
 	            existing.getRightCode().addAll(right.getRightCode());
+	            existing.getRightName().addAll(right.getRightName());
 	        }
 	    }
 		
@@ -68,8 +70,10 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 
 	@Override
 	public EmployeeRights getEmployeeRightsByEmpCode(String emp_code) {
-		String sqlString = "Select er.emp_code,er.right_code,r.right_name,er.createdDateTime,er.createdBy,er.updatedBy from EmployeeRights er "
-				+ "JOIN Rights r on er.right_code = r.right_code where er.emp_code=:emp_code";
+		String sqlString = "SELECT er.emp_code, er.right_code, r.right_name, er.createdDateTime, er.createdBy, er.updatedBy " +
+                "FROM EmployeeRights er " +
+                "JOIN Rights r ON er.right_code = r.right_code " +
+                "WHERE er.emp_code = :emp_code";
 		
 		MapSqlParameterSource param = new MapSqlParameterSource();
 		
@@ -77,7 +81,26 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 		
 		List<EmployeeRights> employeeRights= namedParameterJdbcTemplate.query(sqlString,param, new EmployeeRightsRowMapper());
 	
-		return employeeRights!=null && !employeeRights.isEmpty() ? employeeRights.get(0) : null;
+
+		Map<String, EmployeeRights> empRightsMap = new LinkedHashMap<>();
+
+	    for (EmployeeRights right : employeeRights) {
+	        String empCode = right.getEmpCode();
+
+	        if (!empRightsMap.containsKey(empCode)) {
+	        	empRightsMap.put(empCode, right);
+	        } else {
+	            EmployeeRights existing = empRightsMap.get(empCode);
+	            existing.getRightCode().addAll(right.getRightCode());
+	            existing.getRightName().addAll(right.getRightName());
+	        }
+	    }
+		
+	    List<EmployeeRights> empRights =new ArrayList<>(empRightsMap.values());
+		
+		
+		
+		return empRights!=null && !empRights.isEmpty() ? empRights.get(0) : null;
 		
 	}
 	

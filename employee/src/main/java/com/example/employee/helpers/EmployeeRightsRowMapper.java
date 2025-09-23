@@ -3,7 +3,6 @@ package com.example.employee.helpers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -17,8 +16,10 @@ public class EmployeeRightsRowMapper implements RowMapper<EmployeeRights>{
 		employeeRights.setEmpCode(rs.getString("emp_code"));
 		employeeRights.setRightCode(new ArrayList<>());
 		employeeRights.getRightCode().add(rs.getString("right_code"));
-		employeeRights.setRightCodeAndName(new HashMap<>());
-		employeeRights.getRightCodeAndName().put(rs.getString("right_code"), rs.getString("right_name"));
+		
+		employeeRights.setRightName(new ArrayList<>());
+        employeeRights.getRightName().add(rs.getString("right_name"));
+
 		employeeRights.setEmpRightCreatedDateTime(rs.getTimestamp("createdDateTime").toLocalDateTime());
 		employeeRights.setCreatedBy(rs.getString("createdBy"));
 		employeeRights.setUpdatedBy(rs.getString("updatedBy"));

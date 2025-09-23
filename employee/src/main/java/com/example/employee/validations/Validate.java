@@ -43,9 +43,9 @@ public class Validate {
             throw new EmployeeException("Invalid email format");
         }
         
-        if(!Status.isValidStatus(employee.getEmployeeStatus().name())) {
-            throw new EmployeeException("Invalid Employee status");
-    	}
+//        if(!Status.isValidStatus(employee.getEmployeeStatus().name())) {
+//            throw new EmployeeException("Invalid Employee status");
+//    	}
         
         if (employee.getEmpDepartment() == null || employee.getEmpDepartment().isEmpty()) {
             throw new EmployeeException("Department is mandatory");
@@ -63,8 +63,14 @@ public class Validate {
             throw new EmployeeException("Phone number is mandatory");
         }
         
+
+        if (employee.getPhoneNumber().trim().length()!=10) {
+            throw new EmployeeException("Phone number should contains 10 digits");
+        }
+        
+        
         if (!isValidPhoneNumber(employee.getPhoneNumber())) {
-            throw new EmployeeException("Invalid phone number");
+            throw new EmployeeException("Phone number should stats with numbers between [6,9]");
         }
         
         if (employee.getGender() == null) {
@@ -113,9 +119,14 @@ public class Validate {
         if (employeeRequest.getPhoneNumber() == null || employeeRequest.getPhoneNumber().isEmpty()) {
             throw new EmployeeException("Phone number is mandatory");
         }
+        
+        if (employeeRequest.getPhoneNumber().trim().length()!=10) {
+            throw new EmployeeException("Phone number should contains 10 digits");
+        }
+        
 
         if (!isValidPhoneNumber(employeeRequest.getPhoneNumber())) {
-            throw new EmployeeException("Invalid phone number");
+            throw new EmployeeException("Phone number should stats with numbers between [6,9]");
         }
 
         if (employeeRequest.getGender() == null) {
@@ -157,7 +168,7 @@ public class Validate {
             throw new EmployeeException("Right name is mandatory");
         }
         
-        if (!isAlphaWithSpaces(rights.getRightName())) {
+        if (!isAlphaWithSpacesRight(rights.getRightName())) {
             throw new EmployeeException("Right name must contain only letters and spaces");
         }
 	}
@@ -176,13 +187,13 @@ public class Validate {
             throw new EmployeeException("Employee code must be alphanumeric");
         }
 		
-        if (employeeRights.getRightCode() == null || employeeRights.getRightCode().isEmpty()) {
-            throw new EmployeeException("Right code is mandatory");
-        }
-        
-        if (employeeRights.getRightCode().stream().anyMatch(e -> !isAlphaNumeric(e))) {
-            throw new EmployeeException("Right code must be alphanumeric");
-        }
+//        if (employeeRights.getRightCode() == null || employeeRights.getRightCode().isEmpty()) {
+//            throw new EmployeeException("Rights cannot be empty");
+//        }
+//        
+//        if (employeeRights.getRightCode().stream().anyMatch(e -> !isAlphaNumeric(e))) {
+//            throw new EmployeeException("Right code must be alphanumeric");
+//        }
 
         		
 	}
@@ -206,6 +217,10 @@ public class Validate {
 	
 	public boolean isAlphaWithSpaces(String input) {
 	    return input.matches("^[a-zA-Z ]+$");
+	}
+	
+	public boolean isAlphaWithSpacesRight(String input) {
+	    return input.matches("^[a-zA-Z_ ]+$");
 	}
 
 	public static void validateCriteria(SearchCriteria criteria) throws EmployeeException {

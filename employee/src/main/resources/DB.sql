@@ -20,7 +20,7 @@ select * from EmployeeRights_log;
 CREATE TABLE Rights (
     right_id INT PRIMARY KEY AUTO_INCREMENT,
     right_code VARCHAR(10) UNIQUE NOT NULL , 
-    right_name VARCHAR(10) UNIQUE NOT NULL,
+    right_name VARCHAR(100) UNIQUE NOT NULL,
 	right_status CHAR(1) NOT NULL, 
     createdDateTime DATETIME NOT NULL, 
     updatedDateTime DATETIME ,

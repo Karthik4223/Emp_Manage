@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,9 @@ public class EmployeeServiceImpl implements EmployeeService{
 	@Transactional(rollbackFor = EmployeeException.class)
 	public boolean addEmployee(Employee employee) throws EmployeeException {
 		try {
+			employee.setName(employee.getName().trim());
+			employee.setEmail(employee.getEmail().trim());
+			employee.setPhoneNumber(employee.getPhoneNumber().trim());
 			employee.setEmpCode(genEmpCode());
 			employee.setEmpPassword(getPassword(employee.getName(),employee.getPhoneNumber()));
 			employee.setEmployeeStatus(Status.ACTIVE);
@@ -71,6 +75,18 @@ public class EmployeeServiceImpl implements EmployeeService{
 			}
 			 
 			return res;
+		}catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(),e);
+	        Throwable rootCause = e.getRootCause();
+	        String message = rootCause != null ? rootCause.getMessage() : e.getMessage();
+	        String column = "unknown column";
+	        if (message != null) {
+	            int idx = message.indexOf("for key");
+	            if (idx != -1) {
+	                column = message.substring(idx + 8).replaceAll("['`]", "").trim();
+	            }
+	        }
+	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
@@ -224,5 +240,20 @@ public class EmployeeServiceImpl implements EmployeeService{
 	        throw new EmployeeException("Search Failed");
 	    }
     }
+
+
+	@Override
+	public Employee getAllEmployeeById(String emp_code) throws EmployeeException {
+		try {
+			Validate.validateEmpCode(emp_code);
+			return employeeRepoSolr.getEmployeeById(emp_code);			
+		} catch (EmployeeException e) {
+			log.error(e.getMessage(),e);
+			throw e;
+	    } catch (Exception e) {
+			log.error(e.getMessage(),e);
+	        throw new EmployeeException("No Employee Found with given employee code");
+	    }
+	}
 
 }

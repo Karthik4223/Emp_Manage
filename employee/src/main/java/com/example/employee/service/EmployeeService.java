@@ -19,6 +19,7 @@ public interface EmployeeService {
 	boolean deleteEmployee(String empCode) throws EmployeeException;
 
 	List<Employee> searchEmployees(SearchCriteria criteria) throws EmployeeException;
-
+	
+	Employee getAllEmployeeById(String emp_code) throws EmployeeException;
 
 }

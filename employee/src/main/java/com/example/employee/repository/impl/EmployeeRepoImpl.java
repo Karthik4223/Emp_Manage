@@ -62,7 +62,6 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	@Override
 	public boolean updateEmployee(Employee employee) {
 	    String sqlString = "UPDATE Employees SET "
-	            + "emp_password = :emp_password, "
 	            + "email = :email, "
 	            + "department = :department, "
 	            + "name = :name, "
