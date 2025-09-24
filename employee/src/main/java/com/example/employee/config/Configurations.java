@@ -55,14 +55,6 @@ public class Configurations {
 	}
 
 	
-//	@Bean
-//	public DefaultJmsListenerContainerFactory topicListenerFactory(SingleConnectionFactory singleConnectionFactory) {
-//	    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-//	    factory.setConnectionFactory(singleConnectionFactory);
-//	    factory.setPubSubDomain(true);
-//	    return factory;
-//	}
-	
 	@Bean
 	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(ConnectionFactory connectionFactory) {
 	    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
@@ -101,6 +93,5 @@ public class Configurations {
 		
 		return template;
 	}
-	
 	
 }

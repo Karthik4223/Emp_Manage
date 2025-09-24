@@ -21,8 +21,7 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	private SqlParamSoucreForEmployee sqlParamSoucreForEmployee = new SqlParamSoucreForEmployee();
-
-
+	
 	@Override
 	public boolean addEmployee(Employee employee) {
 		String sqlString = "Insert into Employees(emp_code,emp_password,email,department,name,phone_number,gender,country,state,city,emp_status,createdDateTime,updatedDateTime,createdBy) values "

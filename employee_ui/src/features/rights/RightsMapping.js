@@ -3,9 +3,16 @@ import { useParams } from "react-router-dom";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useRightsService } from "../../services/rightsService";
+import { useEmployeeRightsService } from "../../services/employeeRightsService";
 
 function RightsMapping() {
+  const { getAllRights } = useRightsService();
+  const { getEmployeeRights, assignEmployeeRights } = useEmployeeRightsService();
   const { empCode } = useParams();
+  const { token } = useContext(AuthContext);
 
   const [allRights, setAllRights] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
@@ -30,48 +37,24 @@ function RightsMapping() {
   }, [message, messageType]);
   
 
-  useEffect(() => {
-    const fetchRights = async () => {
+   useEffect(() => {
+    const fetchRightsData = async () => {
       try {
-        const response = await fetch('/rights/getAllRights');
-        if (response.ok){
-            const data = await response.json();
-            setAllRights(data);
-        } else {
-            const data = await response.text();
-            setMessage(data);
-            setMessageType('error');
-        }
+        const rights = await getAllRights(token);
+        setAllRights(rights);
+
+        const empRights = await getEmployeeRights(empCode, token);
+        setSelectedRight(empRights.rightCode || []);
       } catch (error) {
-        setMessage("Error fetching rights");
-        setMessageType("error");
+        setMessage(typeof error === 'string' ? error : "Error fetching rights");
+        setMessageType('error');
       }
     };
 
-    fetchRights();
-  }, []);
+    fetchRightsData();
+  }, [empCode, token]);
 
-  useEffect(() => {
-    const fetchEmployeeRights = async () => {
-      try {
-        const response = await fetch(`/employeeRights/getEmployeeRights/${empCode}`);
-        if (response.ok) {
-          const data = await response.json();
-          setSelectedRight(data.rightCode || []);
-        } else {
-          const data = await response.text();
-          setMessage(data);
-          setMessageType('error');
-        }
-      } catch (error) {
-        setMessage("Error fetching rights");
-        setMessageType("error");
-      }
-    };
-
-    fetchEmployeeRights();
-  }, [empCode]);
-
+   
   const availableRights = useMemo(() => {
     return allRights.filter(right => !selectedRight.includes(right.rightCode));
   }, [allRights, selectedRight]);
@@ -93,36 +76,22 @@ function RightsMapping() {
     }
   };
 
+ 
   const handleSubmit = async () => {
-    const payload = {
-      empCode,
-      rightCode: selectedRight,
-    };
-
     try {
-      const response = await fetch('/employeeRights/addEmployeeRights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setMessage('Rights assigned successfully.');
-        setMessageType('success');
-      } else {
-        const data = await response.text();
-        setMessage(data);
-        setMessageType('error');
-      }
+      await assignEmployeeRights(empCode, selectedRight, token);
+      setMessage('Rights assigned successfully.');
+      setMessageType('success');
     } catch (error) {
-      setMessage('Error assigning rights.');
+      setMessage(typeof error === 'string' ? error : 'Error assigning rights.');
       setMessageType('error');
     }
   };
 
+
   return (
     <div className="content">
-      <h2>Rights Mapping</h2>
+      <h2>Rights Mapping- {empCode}</h2>
 
       <div className="rights-mapping-container">
         <div className="available-rights-mapping-container">

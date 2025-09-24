@@ -1,12 +1,16 @@
 import React from "react";
-import { useState,useEffect } from "react";
+import { useState,useEffect,useCallback } from "react";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useRightsService } from "../../services/rightsService";
 
 
 function Rights() {
+  const { getAllRights, updateRightStatus } = useRightsService();
+  const { token } = useContext(AuthContext);
   const [rights, setRights] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
@@ -23,9 +27,6 @@ function Rights() {
     }
   }, [message, messageType]);
 
-  useEffect(() => {
-    fetchRights();
-  }, []);
 
   useEffect(() => {
   if (message) {
@@ -36,47 +37,32 @@ function Rights() {
   }
   }, [message]);
 
-   const fetchRights = async () => {
-      try {
-        const response = await fetch("rights/getAllRights");
-        const data = await response.json();
-        setRights(data);
-      } catch (error) {
-        setMessage('Error fetching rights');
-        setMessageType('error');
-      }
-    };
+   const fetchRights = useCallback(async () => {
+    try {
+      const data = await getAllRights(token);
+      setRights(data);
+    } catch (err) {
+      setMessage(err || "Error fetching rights");
+      setMessageType("error");
+    }
+  }, [token]);
 
-  const handleStatusChange = (rightCode, currentStatus) => {
+   useEffect(() => {
+    fetchRights();
+  }, [fetchRights]);
+
+  const handleStatusChange = async (rightCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-
-    const updateStatus = async () => {
-      try {
-        const response = await fetch(`rights/updateRightStatus/${rightCode}?newStatus=${newStatus}&updatedBy=XYZ`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok){
-        setMessage(`Right: ${rightCode} ${currentStatus.toLowerCase()}d successfully.`);
-        setMessageType('success');
-        fetchRights();
-      }else{
-        const data = await response.text();
-        setMessage(data);
-        setMessageType('error');
-      }
-
-      } catch (error) {
-        setMessage('Error updating right status');
-        setMessageType('error');
-      }
-    };
-
-    updateStatus();
-  }
+    try {
+      await updateRightStatus(rightCode, newStatus, token);
+      setMessage(`Right: ${rightCode} ${currentStatus.toLowerCase()}d successfully.`);
+      setMessageType("success");
+      fetchRights();
+    } catch (err) {
+      setMessage(err || "Error updating right status");
+      setMessageType("error");
+    }
+  };
   
   if (!rights) {
     return <div className="content">Loading rights...</div>;

@@ -1,11 +1,16 @@
 import React from "react";
-import { useState,useEffect } from "react";
+import { useState,useEffect,useCallback } from "react";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import { useEmployeeRequestService } from "../../services/employeeRequestService";
 
 function EmployeeRequest() {
+  const { getAllEmployeeRequests, updateEmployeeRequestStatus } = useEmployeeRequestService();
+  const { rightsNames, token } = useContext(AuthContext) || [];
+  console.log("Rights in EmployeeRequest:", rightsNames);
   const [employeeRequests, setEmployeeRequests] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
@@ -24,11 +29,6 @@ function EmployeeRequest() {
     }, [message, messageType]);
     
 
-
-  useEffect(() => {
-    fetchEmployeeRequests();
-  }, []);
-
   useEffect(() => {
   if (message) {
     const timeout = setTimeout(() => {
@@ -38,41 +38,31 @@ function EmployeeRequest() {
   }
   }, [message]);
 
-
-  const fetchEmployeeRequests = async () => {
+  const fetchEmployeeRequests = useCallback(async () => {
     try {
-      const response = await fetch("/employeeRequest/getAllEmployeeRequests");
-      if (!response.ok) throw new Error(response.statusText);
-
-      const data = await response.json();
+      const { data } = await getAllEmployeeRequests(token);
       setEmployeeRequests(data);
-    } catch (error) {
-      setMessage('Error fetching employee requests.');
-      setMessageType('error');
-    }
-  };
+      } catch (error) {
+        setMessage("Error fetching employee requests.");
+        setMessageType("error");
+      }
+    }, [token,getAllEmployeeRequests]);
+
+    useEffect(() => {
+      fetchEmployeeRequests();
+    }, [fetchEmployeeRequests]);
+
+
 
   const handleRequest = async (empRequestId, action) => {
     try {
-      const response = await fetch(`/employeeRequest/updateEmployeeRequestStatus/${empRequestId}?newStatus=${action}&updatedBy=XYZ`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok){
-        setMessage(`Request ${action.toLowerCase()} successfully.`);
-        setMessageType('success');
-        fetchEmployeeRequests();
-      }else{
-        const data = await response.text();
-        setMessage(data);
-        setMessageType('error');
-      }
-
+      await updateEmployeeRequestStatus(empRequestId, action, token);
+      setMessage(`Request ${action.toLowerCase()} successfully.`);
+      setMessageType("success");
+      fetchEmployeeRequests();
     } catch (error) {
-      setMessage('Error updating employee request.');
-      setMessageType('error');
+      setMessage(error.response?.data || "Error updating employee request.");
+      setMessageType("error");
     }
   };
 
@@ -138,9 +128,23 @@ function EmployeeRequest() {
               <td>{request.updatedBy && request.updatedBy.charAt(0).toUpperCase() + request.updatedBy.slice(1).toLowerCase()}</td>
               {request.empRequestStatus === "CREATED" ? (
                 <td className="action-column-cell">
-                  <button className="action-button-approve" onClick={() => handleRequest(request.empRequestId, "APPROVED")}>Approve</button>
-                  <button className="action-button-reject" onClick={() => handleRequest(request.empRequestId, "REJECTED")}>Reject</button>
-                </td>
+                      {rightsNames?.includes("RIGHT_EMPLOYEE_APPROVE_REQUEST") && (
+                        <>
+                          <button
+                            className="action-button-approve"
+                            onClick={() => handleRequest(request.empRequestId, "APPROVED")}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="action-button-reject"
+                            onClick={() => handleRequest(request.empRequestId, "REJECTED")}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </td>
               ) : <td className="action-column-cell">{ "N/A" }</td>}
 
             </tr>

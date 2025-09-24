@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,12 @@ public class AuthController {
     @Autowired
     private EmployeeRightsService employeeRightsService;
     
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+    
     @PostMapping("/login") 
     public ResponseEntity<?> authenticate(@RequestBody EmployeeLogin employeeLogin, HttpSession session) {
 
@@ -50,10 +57,25 @@ public class AuthController {
             if (employee.getEmployeeStatus() != null && employee.getEmployeeStatus().toString().equals("INACTIVE")) {
                 return ResponseEntity.status(403).body("Employee is inactive");
             }
+            
+            String storedPassword = employee.getEmpPassword();
+            boolean passwordMatches = false;
 
-            if (!employee.getEmpPassword().equals(password)) {
+            if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$")) {
+                passwordMatches = passwordEncoder.matches(password, storedPassword);
+            } else {
+                passwordMatches = password.equals(storedPassword);
+                if(passwordMatches) {
+                    String hashed = passwordEncoder.encode(storedPassword);
+                    employee.setEmpPassword(hashed);
+                    employeeService.updateEmployee(employee);
+                }
+            }
+
+            if (!passwordMatches) {
                 return ResponseEntity.status(401).body("Invalid password");
             }
+
             
             EmployeeRights employeeRights = employeeRightsService.getEmployeeRightsByEmpCode(empCode);
             
@@ -71,7 +93,12 @@ public class AuthController {
             
             
 
-            String jwtToken = JwtUtil.generateToken(employee.getEmpCode(), employee.getName());
+            String jwtToken = null;
+			try {
+				jwtToken = jwtUtil.generateToken(employee.getEmpCode(), employee.getName(), empRightsNames);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("token", jwtToken);

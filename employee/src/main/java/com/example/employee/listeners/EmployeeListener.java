@@ -3,8 +3,6 @@ package com.example.employee.listeners;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
@@ -36,7 +34,6 @@ public class EmployeeListener {
 	@Autowired
 	private EmployeeService employeeService;
 	
-	 Logger logger = LoggerFactory.getLogger(EmployeeListener.class);
 
 	
 	
@@ -46,9 +43,8 @@ public class EmployeeListener {
 		try {
 			emp_code = message.getString("emp_code");
 			employeeRepoSolr.addEmployeeToSolr(employeeRepo.getAllEmployeeById(emp_code));
-			logger.trace("Received: {}", emp_code);
-			logger.trace("Data By EMPID: {}", employeeRepo.getAllEmployeeById(emp_code));
 		} catch (JMSException e) {
+			log.error(e.getMessage(),e);
 			throw new EmployeeException("Falied to get employee code from queue");
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
@@ -62,19 +58,19 @@ public class EmployeeListener {
 		try {
 			emp_RequestId = message.getInt("emp_RequestId");
 		} catch (JMSException e) {
+			log.error(e.getMessage(),e);
 			throw new EmployeeException("Falied to get employee RequestId from queue");
 		}
 		
-		logger.trace("Received: {}", emp_RequestId);
-		logger.trace("Data By EMPID: {}", employeeRequestRepo.getEmployeeRequestById(emp_RequestId));
-
+	
 		EmployeeRequest employeeRequest =employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
 		Employee employee = EmployeeMapperFromEmployeeRequest.employeeMapperFromEmployeeRequest(employeeRequest);
 		
 	try {
 			employeeService.addEmployee(employee);
 		} catch (EmployeeException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(),e);
+			throw new EmployeeException("Failed to add Employee");	
 		}
 	}
 	

@@ -1,12 +1,15 @@
 import React from "react";
 import { useState,useEffect } from "react";
 
-
+import { useRightsService } from "../../services/rightsService";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 function CreateRight() {
+    const { createRight } = useRightsService();
+    const { token } = useContext(AuthContext);
     const [Right, setRight] = useState({
         rightName: ''
     });
@@ -28,35 +31,21 @@ function CreateRight() {
     }, [message, messageType]);
         
 
-    const handleFormSubmit = (e) => {
+
+      const handleFormSubmit = async (e) => {
         e.preventDefault();
+        setMessage("");
+        setMessageType("");
 
-        const submitRight = async () => {
-            try {
-                const response = await fetch('rights/addRight', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(Right),
-                });
-
-                if (response.ok) {
-                    setMessage('Right created successfully.');
-                    setMessageType('success');
-                    setRight({ rightName: '' });
-                } else {
-                    const data = await response.text();
-                    setMessage(data);
-                    setMessageType('error');
-                }
-            } catch (error) {
-                setMessage('Error creating right.');
-                setMessageType('error');
-            }
-        };
-
-        submitRight();
+        try {
+            await createRight(Right, token);
+            setMessage("Right created successfully.");
+            setMessageType("success");
+            setRight({ rightName: "" });
+        } catch (err) {
+            setMessage(err || "Error creating right.");
+            setMessageType("error");
+        }
     };
 
    const handleChange = (e) => {

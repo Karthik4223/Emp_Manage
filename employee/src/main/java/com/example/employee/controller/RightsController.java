@@ -70,10 +70,10 @@ public class RightsController {
 	}
 	
 	@PutMapping("/updateRightStatus/{rightCode}")
-	public ResponseEntity<String> updateRightStatus(@PathVariable String rightCode,@RequestParam Status newStatus,@RequestParam String updatedBy) {
+	public ResponseEntity<String> updateRightStatus(@PathVariable String rightCode,@RequestParam Status newStatus) {
 		boolean res = false;
 		try {
-			res = rightsService.updateRightsStatus(rightCode,newStatus,updatedBy);
+			res = rightsService.updateRightsStatus(rightCode,newStatus,"ADMIN");
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

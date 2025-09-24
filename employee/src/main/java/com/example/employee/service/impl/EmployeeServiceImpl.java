@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +37,9 @@ public class EmployeeServiceImpl implements EmployeeService{
 	
 	private static final String QUEUE_STRING = "employee-queue";
 	
-
+	@Autowired
+	@Lazy
+	private PasswordEncoder passwordEncoder;
 	
 	@Override
 	@Transactional(rollbackFor = EmployeeException.class)
@@ -45,7 +49,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 			employee.setEmail(employee.getEmail().trim());
 			employee.setPhoneNumber(employee.getPhoneNumber().trim());
 			employee.setEmpCode(genEmpCode());
-			employee.setEmpPassword(getPassword(employee.getName(),employee.getPhoneNumber()));
+			employee.setEmpPassword(passwordEncoder.encode(getPassword(employee.getName(),employee.getPhoneNumber())));
 			employee.setEmployeeStatus(Status.ACTIVE);
 			employee.setEmpCreatedDateTime(LocalDateTime.now());
 			employee.setCreatedBy("ADMIN");
@@ -71,7 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 //	    });
 			
 			if(res) {
-				return employeeRepoSolr.addEmployeeToSolr(employee);
+				return employeeRepoSolr.addEmployeeToSolr(employeeRepo.getAllEmployeeById(employee.getEmpCode()));
 			}
 			 
 			return res;

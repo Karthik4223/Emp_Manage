@@ -22,10 +22,10 @@ export const AuthProvider = ({ children }) => {
       const decoded = jwtDecode(token);
       setUsername(decoded.empName);
       if (rights.length === 0) {
-        setRights(decoded.rights || []);
+        setRights(rights || []);
       }
       if (rightsNames.length === 0) {
-        setRightsNames(decoded.rightsNames || []);
+        setRightsNames(rightsNames || []);
       }
     } catch (err) {
       setToken(null);

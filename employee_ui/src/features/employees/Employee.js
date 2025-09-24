@@ -1,18 +1,22 @@
-import React from "react";
-import { useState,useEffect } from "react";
+import React, { useContext } from "react";
+import { useState,useEffect,useCallback } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CreateEmployee from "./CreateEmployee";
 
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
+import { AuthContext } from "../../context/AuthContext";
+import { useEmployeeService } from "../../services/employeeService";
 
 
 function Employee({onNavigate}) {
+  const { getAllEmployees, updateEmployeeStatus, searchEmployees } = useEmployeeService();
+  const { rightsNames, token } = useContext(AuthContext) || [];
   const [employeeDetails, setEmployeeDetails] = useState([]);
   const [editPopupOpen, setEditPopupOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState(null);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const [filterPopupOpen, setFilterPopupOpen] = useState(false);
   const [filterData, setFilterData] = useState({
@@ -29,112 +33,69 @@ function Employee({onNavigate}) {
   const [emailOptions, setEmailOptions] = useState([]);
   const [phoneOptions, setPhoneOptions] = useState([]);
   const [empCodeOptions, setEmpCodeOptions] = useState([]);
-  // const [searchKeyOptions, setSearchKeyOptions] = useState([]);
+  const [searchKeyOptions, setSearchKeyOptions] = useState([]);
+
+  
+  const fetchEmployeeDetails = useCallback(async () => {
+  try {
+    const  data  = await getAllEmployees();
+    setEmployeeDetails(data);
+  } catch (error) {
+    toast.error("Error fetching employee details.");
+  } 
+}, [token]);
 
 
+    useEffect(() => {
+      fetchEmployeeDetails();
+    }, [fetchEmployeeDetails]);
 
-  useEffect(() => {
-    fetchEmployeeDetails();
-  }, []);
-
-
-  const fetchEmployeeDetails = async () => {
-    try {
-      const response = await fetch("employee/getAllEmployees");
-      if (!response.ok) throw new Error(response.statusText);
-      const data = await response.json();
-      setEmployeeDetails(data);
-    } catch (error) {
-      toast.error('Error fetching employee details.');
+  const handleEdit = (empCode) => {
+    const emp = employeeDetails.find((e) => e.empCode === empCode);
+    if (emp) {
+      setEmployeeToEdit(emp);
+      setEditPopupOpen(true);
     }
   };
 
-      const handleEdit = (empCode) => {
-      const emp = employeeDetails.find((e) => e.empCode === empCode);
-      if (emp) {
-        setEmployeeToEdit(emp);
-        setEditPopupOpen(true);
-      }
-    };
-
-
-
-  const handleStatusChange = (empCode, currentStatus) => {
+  const handleStatusChange = async (empCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    try {
+      await updateEmployeeStatus(empCode, newStatus);
 
-    const updateStatus = async () => {
-      try {
-        const response = await fetch(`/employee/updateEmpStatus/${empCode}?newStatus=${newStatus}&updatedBy=XYZ`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok){
-
-            toast.success(`Employee: ${empCode} ${currentStatus.toLowerCase()}d successfully.`);
-
-           if (filterPopupOpen || Object.values(filterData).some(v => v)) {
-              fetchFilteredEmployees();
-            } else {
-              fetchEmployeeDetails();
-            }
-      }else{
-        const data = await response.text();
-        toast.error(data);
-      }
-
-      } catch (error) {
-        toast.error('Error updating employee status.');
-      }
-    };
-
-    updateStatus();
-  }
+      toast.success(`Employee: ${empCode} ${currentStatus.toLowerCase()}d successfully.`);
+      filterPopupOpen || Object.values(filterData).some((v) => v) ? fetchFilteredEmployees() : fetchEmployeeDetails();
+    } catch (error) {
+      toast.error(error || "Error updating employee status.");
+    }
+  };
 
   const handleRightsMapping = (empCode) => {
     onNavigate(`rights-mapping/${empCode}`);
   }
 
+    const fetchFilteredEmployees = async () => {
+    const payload = {
+      employeeNames: filterData.name ? [filterData.name] : [],
+      employeeEmail: filterData.email ? [filterData.email] : [],
+      employeePhoneNumber: filterData.phoneNumber ? [filterData.phoneNumber] : [],
+      employeeDepartment: filterData.empDepartment ? [filterData.empDepartment] : [],
+      searchKey: filterData.searchKey || "",
+      employeeStatus: filterData.employeeStatus || null,
+      employeeCode: filterData.employeeCode ? [filterData.employeeCode] : [],
+    };
 
-  const fetchFilteredEmployees = async () => {
-  const payload = {
-    employeeNames: filterData.name ? [filterData.name] : [],
-    employeeEmail: filterData.email ? [filterData.email] : [],
-    employeePhoneNumber: filterData.phoneNumber ? [filterData.phoneNumber] : [],
-    employeeDepartment: filterData.empDepartment ? [filterData.empDepartment] : [],
-    searchKey: filterData.searchKey || null,
-    employeeStatus: filterData.employeeStatus || null,
-    employeeCode: filterData.employeeCode ? [filterData.employeeCode] :[],
+    try {
+      const data = await searchEmployees(payload);
+      setEmployeeDetails(data);
+      toast.success("Filter applied successfully.");
+    } catch (error) {
+      console.error(error);
+      toast.error(error || "Failed to apply filter.");
+    }
   };
 
-  try {
-    const response = await fetch('/employee/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.ok) {
-        const data = await response.json();
-        setEmployeeDetails(data);
-        toast.success("Filter applied successfully.");
-      } else {
-        const errorText = await response.text();
-        toast.error(errorText);
-      }
-
-  } catch (error) {
-    console.error("Error fetching filtered employees:", error);
-    toast.error("Failed to apply filter.");
-  }
-};
-
  
-  if (!employeeDetails) {
-    return <div className="content">Loading employee details...</div>;
-  }
 
   return (
     <div className="content">
@@ -200,23 +161,22 @@ function Employee({onNavigate}) {
               <label>Name:</label>
               <AsyncTypeahead
                 id="name-search"
-                isLoading={false}
+                isLoading={isLoading}
                 minLength={2}
                 labelKey="name"
                 onSearch={async (query) => {
                   try {
+                    setIsLoading(true);
                     const payload = { employeeNames: [query] };
-                    const response = await fetch('/employee/search', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload),
-                    });
-                    if (response.ok) {
-                      const data = await response.json();
-                      setNameOptions(data.map(emp => emp.name));
-                    }
+                    const { data } = await searchEmployees(payload, token);
+                    setEmployeeDetails(data);
+                    setNameOptions(data.map((emp) => emp.name));
+                    
                   } catch (error) {
                     console.error(error);
+                  }
+                  finally {
+                    setIsLoading(false);
                   }
                 }}
                 onChange={(selected) => setFilterData({ ...filterData, name: selected[0] || '' })}
@@ -236,15 +196,10 @@ function Employee({onNavigate}) {
                 onSearch={async (query) => {
                   try {
                     const payload = { employeeEmail: [query] };
-                    const response = await fetch('/employee/search', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload),
-                    });
-                    if (response.ok) {
-                      const data = await response.json();
-                      setEmailOptions(data.map(emp => emp.email));
-                    }
+                    const { data } = await searchEmployees(payload,token);
+                    setEmployeeDetails(data);
+                    setEmailOptions(data.map((emp) => emp.email));
+                    
                   } catch (error) {
                     console.error(error);
                   }
@@ -266,15 +221,10 @@ function Employee({onNavigate}) {
                 onSearch={async (query) => {
                   try {
                     const payload = { employeePhoneNumber: [query] };
-                    const response = await fetch('/employee/search', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload),
-                    });
-                    if (response.ok) {
-                      const data = await response.json();
-                      setPhoneOptions(data.map(emp => emp.phoneNumber));
-                    }
+                    const { data } = await searchEmployees(payload,token);
+                    setEmployeeDetails(data);
+                    setPhoneOptions(data.map((emp) => emp.phoneNumber));
+                    
                   } catch (error) {
                     console.error(error);
                   }
@@ -296,15 +246,10 @@ function Employee({onNavigate}) {
                 onSearch={async (query) => {
                   try {
                     const payload = { employeeCode: [query] };
-                    const response = await fetch('/employee/search', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload),
-                    });
-                    if (response.ok) {
-                      const data = await response.json();
-                      setEmpCodeOptions(data.map(emp => emp.empCode));
-                    }
+                    const { data } = await searchEmployees(payload,token);
+                    setEmployeeDetails(data);
+                    setEmpCodeOptions(data.map((emp) => emp.empCode));
+                    
                   } catch (error) {
                     console.error(error);
                   }
@@ -347,19 +292,59 @@ function Employee({onNavigate}) {
             </div>
 
             <div className="custom-form-group">
+              <label>Status:</label>
+              <select
+                name="employeeStatus"
+                value={filterData.employeeStatus}
+                onChange={(e) => setFilterData({ ...filterData, employeeStatus: e.target.value })}
+              >
+                <option value="">All</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+
+            {/* Search Key */}
+            <div className="custom-form-group">
               <label>Search Key:</label>
-              <input
-                name="searchKey"
-                value={filterData.searchKey}
-                onChange={(e) => setFilterData({ ...filterData, searchKey: e.target.value })}
-              />
+              <AsyncTypeahead
+                id="searchkey-search"
+                isLoading={isLoading}
+                minLength={2}
+                labelKey={(option) =>
+                `${option.name || ""} | ${option.empCode || ""} | ${option.email || ""}`
+              }
+              onSearch={async (query) => {
+                try {
+                  setIsLoading(true);
+                  
+                  const payload = { searchKey: query };
+                  const { data } = await searchEmployees(payload,token);
+                  setEmployeeDetails(data);
+                  setSearchKeyOptions(data);
+                  
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              onChange={(selected) =>
+                setFilterData({
+                  ...filterData,
+                  searchKey: selected[0] ? (selected[0].name || selected[0].empCode || selected[0].email) : ""
+                })
+              }
+              options={searchKeyOptions || []}
+              placeholder="Search by name, emp code, or email..."
+            />
             </div>
 
             <div className="custom-form-group-button" style={{ marginTop: '10px' }}>
               <button
                 onClick={() => {
                   setFilterPopupOpen(false);
-                  fetchFilteredEmployees();
+                  // fetchFilteredEmployees();
                 }}
                 style={{ marginRight: '10px' }}
               >
@@ -390,8 +375,6 @@ function Employee({onNavigate}) {
       )}
 
 
-
-
       <h2>Employee Details</h2>
       <div className="table-container"> 
       <table className="employee-table">
@@ -415,7 +398,8 @@ function Employee({onNavigate}) {
           </tr>
         </thead>
         <tbody>
-        {employeeDetails.map((employee) => (
+        {employeeDetails && employeeDetails.length > 0 ? (
+          employeeDetails.map((employee) => (
             <tr key={employee.empCode} className="employee-table-row data-row">
               <td>{employee.empCode}</td>
               <td>{employee.email}</td>
@@ -431,14 +415,45 @@ function Employee({onNavigate}) {
               <td>{employee.empUpdatedDateTime}</td>
               <td>{employee.createdBy.charAt(0).toUpperCase() + employee.createdBy.slice(1).toLowerCase()}</td>
               <td>{employee.updatedBy && employee.updatedBy.charAt(0).toUpperCase() + employee.updatedBy.slice(1).toLowerCase()}</td>
-              <td className="action-column-cell">
-                <button className="action-button-edit-button" onClick={() => handleEdit(employee.empCode)}>Edit</button>
-                <button className="action-button-status-button" onClick={() => handleStatusChange(employee.empCode, employee.employeeStatus)}>{employee.employeeStatus === "ACTIVE" ? "Inactivate" : "Activate"}</button>
-                <button className="action-button-rights-button" onClick={() => handleRightsMapping(employee.empCode)}>Manage Rights</button>
-              </td>
+             <td className="action-column-cell">
+              {rightsNames?.includes("RIGHT_EMPLOYEE_EDIT") && (
+                <button
+                  className="action-button-edit-button"
+                  onClick={() => handleEdit(employee.empCode)}
+                  disabled={employee.employeeStatus !== "ACTIVE"}
+                >
+                  Edit
+                </button>
+              )}
+
+              {rightsNames?.includes("RIGHT_EMPLOYEE_CHANGE_STATUS") && (
+                <button
+                  className="action-button-status-button"
+                  onClick={() => handleStatusChange(employee.empCode, employee.employeeStatus)}
+                >
+                  {employee.employeeStatus === "ACTIVE" ? "Inactivate" : "Activate"}
+                </button>
+              )}
+
+              {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_RIGHTS") && (
+                <button
+                  className="action-button-edit-button"
+                  onClick={() => handleRightsMapping(employee.empCode)}
+                  disabled={employee.employeeStatus !== "ACTIVE"}
+                >
+                  Manage Rights
+                </button>
+              )}
+            </td>
+
 
             </tr>
-          ))}
+          ))
+        ) : (
+          <tr>
+            <td colSpan="15" style={{ textAlign: 'center' }}>No employees found.</td>
+          </tr>
+        )}
         </tbody>  
       </table>
     </div>

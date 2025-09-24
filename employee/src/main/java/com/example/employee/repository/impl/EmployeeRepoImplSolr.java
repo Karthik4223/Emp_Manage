@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -295,26 +294,30 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
             query.add("(" + phoneNumberQuery + ")");
         }
         
+        
         if (criteria.getSearchKey() != null && !criteria.getSearchKey().isEmpty()) {
-        	String keyword = criteria.getSearchKey().toLowerCase();
-            List<String> searchFields = Arrays.asList("email", "emp_code", "name");
+            String searchKey = criteria.getSearchKey().trim();
 
-            List<String> fieldQueries = new ArrayList<>();
+            String[] tokens = searchKey.split("\\s*\\|\\s*|\\s+");
 
-            for (String field : searchFields) {
-                fieldQueries.add(field + ":*" + keyword + "*");
+            List<String> tokenQueries = new ArrayList<>();
+            for (String token : tokens) {
+                if (!token.isEmpty()) {
+                    tokenQueries.add("(name:*" + token + "* OR email:*" + token + "* OR emp_code:*" + token + "*)");
+                }
             }
 
-            String combinedQuery = String.join(" OR ", fieldQueries);
-
-            query.add(combinedQuery);
+            if (!tokenQueries.isEmpty()) {
+                query.add("(" + String.join(" OR ", tokenQueries) + ")");
+            }
         }
 
+
         
-        String queryString =  String.join(" OR ", query);
+        String queryString = !query.isEmpty() ? String.join(" AND ", query) : "*:*";
 
         solrQuery.setQuery(queryString);
-        solrQuery.setRows(1000);
+        solrQuery.setRows(10000);
 
         QueryResponse response = null;
 		try {
