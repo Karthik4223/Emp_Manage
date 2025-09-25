@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEmployeeService } from "../../services/employeeService";
 import { useEmployeeRequestService } from "../../services/employeeRequestService";
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
+
 
 function CreateEmployee({ prefillData, onClose }) {
   const { updateEmployee } = useEmployeeService();
   const { createEmployee } = useEmployeeRequestService();
+  const { username }= useContext(AuthContext);
 
-  const { token } = useContext(AuthContext);
   const [employeeRequestData, setEmployeeRequestData] = useState({
     empCode: '',
     employeeStatus: '',
@@ -22,6 +22,8 @@ function CreateEmployee({ prefillData, onClose }) {
     country: '',
     state: '',
     city: '',
+    createdBy: username,
+    updatedBy: ''
   });
 
   const [message, setMessage] = useState('');
@@ -54,8 +56,10 @@ function CreateEmployee({ prefillData, onClose }) {
       country: prefillData.country || '',
       state: prefillData.state || '',
       city: prefillData.city || '',
+      createdBy: prefillData.createdBy || '',
+      updatedBy: username
     });
-  }, [prefillData]);
+  }, [prefillData, username]);
 
     useEffect(() => {
       if (employeeRequestData.country) {
@@ -141,13 +145,13 @@ function CreateEmployee({ prefillData, onClose }) {
 
     try {
       if (isEditMode) {
-        await updateEmployee(employeeRequestData, token);
-        setMessage("Employee updated successfully!");
+        await updateEmployee(employeeRequestData);
+        toast.success("Employee updated successfully!");
       } else {
         let payload = { ...employeeRequestData };
         delete payload.empCode;
         delete payload.employeeStatus;
-        await createEmployee(payload, token);
+        await createEmployee(payload);
         setMessage("Employee created successfully!");
       }
       setMessageType("success");
@@ -170,62 +174,7 @@ function CreateEmployee({ prefillData, onClose }) {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     setMessage('');
-  //     setMessageType('');
-
-  //     try {
-  //       const endpoint = isEditMode ? '/employee/updateEmployee' : '/employeeRequest/addEmployeeRequest';
-  //       const method = isEditMode ? 'PUT' : 'POST';
-
-  //        let payload = { ...employeeRequestData };
-
-  //       if (!isEditMode) {
-  //         delete payload.empCode;
-  //         delete payload.employeeStatus;
-  //       }
-
-
-  //       const response = await fetch(endpoint, {
-  //         method: method,
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify(payload),
-  //       });
-
-  //       const data = await response.text();
-
-  //       if (response.ok) {
-  //         setMessage(isEditMode ? 'Employee updated successfully!' : 'Employee created successfully!');
-  //         setMessageType('success');
-  //         onClose?.();
-  //         setEmployeeRequestData({
-  //           empCode: '',
-  //           employeeStatus: '',
-  //           email: '',
-  //           name: '',
-  //           gender: '',
-  //           empDepartment: '',
-  //           phoneNumber: '',
-  //           country: '',
-  //           state: '',
-  //           city: '',
-  //         });
-
-  //       } else {
-  //         setMessage(data || 'Something went wrong.');
-  //         setMessageType('error');
-  //         toast.error(data);
-  //       }
-
-  //     } catch (error) {
-  //       setMessage('Error submitting form.');
-  //       setMessageType('error');
-  //       toast.error('Error submitting form.');
-  //     }
-  //   };
-
-
+ 
   return (
     <div className="form-content">
       <div className="create-employee">

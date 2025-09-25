@@ -3,8 +3,6 @@ import { AuthContext } from '../context/AuthContext';
 
 function NavBar({ onNavigate, activePage }) {
   const { rightsNames } = useContext(AuthContext) || [];
-  console.log("Rights in NavBar:", rightsNames);
-
   return (
     <nav className="custom-navbar">
       <ul className="custom-navbar-list">
@@ -17,6 +15,7 @@ function NavBar({ onNavigate, activePage }) {
             Home
           </button>
         </li>
+
 
         {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_RIGHTS") && (
           <li>
@@ -60,6 +59,17 @@ function NavBar({ onNavigate, activePage }) {
               Create Employee
             </button>
           </li>
+        )}
+
+        {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_EXCEL") && (
+          <li>
+            <button
+              className={`custom-navbar-button ${activePage === 'create-employee-excel' ? 'active' : ''}`}
+              onClick={() => onNavigate('create-employee-excel')}
+            >
+            Create Employees (Excel)
+          </button>
+        </li>
         )}
 
         {rightsNames?.includes("RIGHT_EMPLOYEE_APPROVE_REQUEST") && (

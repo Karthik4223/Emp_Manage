@@ -52,7 +52,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 			employee.setEmpPassword(passwordEncoder.encode(getPassword(employee.getName(),employee.getPhoneNumber())));
 			employee.setEmployeeStatus(Status.ACTIVE);
 			employee.setEmpCreatedDateTime(LocalDateTime.now());
-			employee.setCreatedBy("ADMIN");
 			
 			Validate.validateEmployee(employee);
 			Validate.validateEmpCode(employee.getEmpCode());
@@ -124,7 +123,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 				throw new EmployeeException("Failed to log employee before update");
 			}
 			employee.setEmpUpdatedDateTime(LocalDateTime.now());
-			employee.setUpdatedBy("ADMIN");
 			boolean res= employeeRepo.updateEmployee(employee);
 			if(res) {
 				return employeeRepoSolr.updateEmployeeInSolr(employeeRepo.getAllEmployeeById(employee.getEmpCode()));

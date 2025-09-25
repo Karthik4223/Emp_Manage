@@ -9,9 +9,11 @@ import { AuthContext } from "../../context/AuthContext";
 
 function CreateRight() {
     const { createRight } = useRightsService();
-    const { token } = useContext(AuthContext);
+    const { username } = useContext(AuthContext);
+
     const [Right, setRight] = useState({
-        rightName: ''
+        rightName: '',
+        createdBy: username
     });
 
     const [message, setMessage] = useState('');
@@ -38,7 +40,7 @@ function CreateRight() {
         setMessageType("");
 
         try {
-            await createRight(Right, token);
+            await createRight(Right);
             setMessage("Right created successfully.");
             setMessageType("success");
             setRight({ rightName: "" });

@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.employee.enums.EmployeeRequestStatus;
 import com.example.employee.model.EmployeeRequest;
 import com.example.employee.service.EmployeeRequestService;
+import com.example.employee.service.impl.EmployeeExcelService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +30,10 @@ public class EmployeeRequestController {
 	
 	@Autowired
 	private EmployeeRequestService employeeRequestService;
+	
+	@Autowired
+    private EmployeeExcelService employeeExcelService;
+
 	
 	@PostMapping("/addEmployeeRequest")
 	public ResponseEntity<String> addEmployeeRequest(@RequestBody EmployeeRequest employeeRequest){
@@ -104,6 +110,28 @@ public class EmployeeRequestController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete EmployeeRequest");
 		}
 	}
+	
+	
+    @PostMapping("/upload-excel")
+    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file,@RequestParam String createdBy) {
+    	 boolean res = false;
+    	try {
+            List<EmployeeRequest> employees = employeeExcelService.parseExcel(file,createdBy);
+            
+           res=employeeRequestService.addEmployeeRequests(employees);
+        } catch (Exception e) {
+			log.error(e.getMessage(),e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+	    if(res) {
+	    	return ResponseEntity.ok("Employee Requests Created");        	   
+	    }else {
+	    	return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	    			.body("Failed to process excel file");           
+	    }
+	  
+    }
 
 
 }

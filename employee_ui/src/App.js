@@ -15,6 +15,7 @@ const SearchEmployee = lazy(() => import("./features/employees/SearchEmployee"))
 const Rights = lazy(() => import("./features/rights/Rights"));
 const CreateRight = lazy(() => import("./features/rights/CreateRight"));
 const RightsMapping = lazy(() => import("./features/rights/RightsMapping"));
+const CreateEmployeeExcel = lazy(() => import("./features/employees/CreateEmployeeExcel"));
 
 const PrivateRoute = ({ children }) => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -91,6 +92,12 @@ function App() {
         <Route path="/search-employee" element={
           <PrivateRoute>
             <SearchEmployee />
+          </PrivateRoute>
+        } />
+
+        <Route path="/create-employee-excel" element={
+          <PrivateRoute>
+            <CreateEmployeeExcel />
           </PrivateRoute>
         } />
 

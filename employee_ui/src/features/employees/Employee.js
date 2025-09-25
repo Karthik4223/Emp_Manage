@@ -17,6 +17,7 @@ function Employee({onNavigate}) {
   const [editPopupOpen, setEditPopupOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { username } = useContext(AuthContext);
 
   const [filterPopupOpen, setFilterPopupOpen] = useState(false);
   const [filterData, setFilterData] = useState({
@@ -43,7 +44,7 @@ function Employee({onNavigate}) {
   } catch (error) {
     toast.error("Error fetching employee details.");
   } 
-}, [token]);
+  }, []);
 
 
     useEffect(() => {
@@ -61,7 +62,7 @@ function Employee({onNavigate}) {
   const handleStatusChange = async (empCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
-      await updateEmployeeStatus(empCode, newStatus);
+      await updateEmployeeStatus(empCode, newStatus, username);
 
       toast.success(`Employee: ${empCode} ${currentStatus.toLowerCase()}d successfully.`);
       filterPopupOpen || Object.values(filterData).some((v) => v) ? fetchFilteredEmployees() : fetchEmployeeDetails();
@@ -95,6 +96,15 @@ function Employee({onNavigate}) {
     }
   };
 
+  const clearedSearch = {
+    name: '',
+    email: '',
+    phoneNumber: '',
+    employeeCode: '',
+    empDepartment: '',
+    employeeStatus: '',
+    searchKey: '',
+  };
  
 
   return (
@@ -118,6 +128,7 @@ function Employee({onNavigate}) {
           <CreateEmployee
             prefillData={employeeToEdit}
             onClose={() => {
+              toast.success("Employee updated successfully.");
               setEditPopupOpen(false);
               setEmployeeToEdit(null);
               fetchEmployeeDetails();
@@ -165,6 +176,10 @@ function Employee({onNavigate}) {
                 minLength={2}
                 labelKey="name"
                 onSearch={async (query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
                   try {
                     setIsLoading(true);
                     const payload = { employeeNames: [query] };
@@ -194,6 +209,10 @@ function Employee({onNavigate}) {
                 minLength={2}
                 labelKey="email"
                 onSearch={async (query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
                   try {
                     const payload = { employeeEmail: [query] };
                     const { data } = await searchEmployees(payload,token);
@@ -219,6 +238,10 @@ function Employee({onNavigate}) {
                 minLength={2}
                 labelKey="phoneNumber"
                 onSearch={async (query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
                   try {
                     const payload = { employeePhoneNumber: [query] };
                     const { data } = await searchEmployees(payload,token);
@@ -244,6 +267,10 @@ function Employee({onNavigate}) {
                 minLength={1}
                 labelKey="empCode"
                 onSearch={async (query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
                   try {
                     const payload = { employeeCode: [query] };
                     const { data } = await searchEmployees(payload,token);
@@ -260,49 +287,64 @@ function Employee({onNavigate}) {
               />
             </div>
 
-            {/* Department Dropdown */}
+           {/* Department */}
             <div className="custom-form-group">
               <label>Department:</label>
-              <select
-                name="empDepartment"
-                value={filterData.empDepartment}
-                onChange={(e) => setFilterData({ ...filterData, empDepartment: e.target.value })}
-              >
-                <option value="">All</option>
-                <option value="hr">HR</option>
-                <option value="development">Development</option>
-                <option value="testing">Testing</option>
-                <option value="management">Management</option>
-                <option value="sales">Sales</option>
-                <option value="marketing">Marketing</option>
-              </select>
+              <AsyncTypeahead
+                id="department-search"
+                isLoading={false}
+                minLength={1}
+                labelKey="empDepartment"
+                onSearch={async (query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
+                  try {
+                    const payload = { employeeDepartment: [query] };
+                    const { data } = await searchEmployees(payload, token);
+                    setEmployeeDetails(data);
+                    setEmpCodeOptions([...new Set(data.map((emp) => emp.empDepartment))]);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
+                onChange={(selected) =>
+                  setFilterData({ ...filterData, empDepartment: selected[0] || '' })
+                }
+                options={empCodeOptions || []}
+                placeholder="Search department..."
+              />
             </div>
 
+            {/* Status */}
             <div className="custom-form-group">
               <label>Status:</label>
-              <select
-                name="employeeStatus"
-                value={filterData.employeeStatus}
-                onChange={(e) => setFilterData({ ...filterData, employeeStatus: e.target.value })}
-              >
-                <option value="">All</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
+              <AsyncTypeahead
+                id="status-search"
+                isLoading={false}
+                minLength={1}
+                labelKey={(option) => option}
+                onSearch={(query) => {
+                  if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
+                  const statuses = ["ACTIVE", "INACTIVE"];
+                  setSearchKeyOptions(
+                    statuses.filter((s) =>
+                      s.toLowerCase().includes(query.toLowerCase())
+                    )
+                  );
+                }}
+                onChange={(selected) =>
+                  setFilterData({ ...filterData, employeeStatus: selected[0] || '' })
+                }
+                options={searchKeyOptions || []}
+                placeholder="Search status..."
+              />
             </div>
 
-            <div className="custom-form-group">
-              <label>Status:</label>
-              <select
-                name="employeeStatus"
-                value={filterData.employeeStatus}
-                onChange={(e) => setFilterData({ ...filterData, employeeStatus: e.target.value })}
-              >
-                <option value="">All</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
 
             {/* Search Key */}
             <div className="custom-form-group">
@@ -315,6 +357,10 @@ function Employee({onNavigate}) {
                 `${option.name || ""} | ${option.empCode || ""} | ${option.email || ""}`
               }
               onSearch={async (query) => {
+                if (!query) {
+                    fetchEmployeeDetails();
+                    return;
+                  }
                 try {
                   setIsLoading(true);
                   
@@ -344,7 +390,7 @@ function Employee({onNavigate}) {
               <button
                 onClick={() => {
                   setFilterPopupOpen(false);
-                  // fetchFilteredEmployees();
+                  fetchFilteredEmployees();
                 }}
                 style={{ marginRight: '10px' }}
               >

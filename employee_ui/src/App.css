@@ -216,6 +216,11 @@
   background-color: #218838;
 }
 
+.custom-form-group-button button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 /* employee/employeeRequest/rights details */
 .table-container {
   width: 100%;
@@ -436,4 +441,24 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
+}
+
+
+/* create employee excel upload */
+
+.instructions-container{
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto 20px auto;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 50px;
+  margin-left: 0px;
+}
+
+.instructions {
+  margin-bottom: 15px;
+  color: #555;
 }

@@ -21,5 +21,7 @@ public interface EmployeeRequestRepo {
 
 	EmployeeRequest getEmployeeRequestById(Integer empRequestId);
 
+	boolean addEmployeeRequests(List<EmployeeRequest> employees);
+
 	
 }

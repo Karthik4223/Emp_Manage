@@ -3,8 +3,6 @@ import { useParams } from "react-router-dom";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
 import { useRightsService } from "../../services/rightsService";
 import { useEmployeeRightsService } from "../../services/employeeRightsService";
 
@@ -12,7 +10,6 @@ function RightsMapping() {
   const { getAllRights } = useRightsService();
   const { getEmployeeRights, assignEmployeeRights } = useEmployeeRightsService();
   const { empCode } = useParams();
-  const { token } = useContext(AuthContext);
 
   const [allRights, setAllRights] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
@@ -40,10 +37,10 @@ function RightsMapping() {
    useEffect(() => {
     const fetchRightsData = async () => {
       try {
-        const rights = await getAllRights(token);
+        const rights = await getAllRights();
         setAllRights(rights);
 
-        const empRights = await getEmployeeRights(empCode, token);
+        const empRights = await getEmployeeRights(empCode);
         setSelectedRight(empRights.rightCode || []);
       } catch (error) {
         setMessage(typeof error === 'string' ? error : "Error fetching rights");
@@ -52,7 +49,7 @@ function RightsMapping() {
     };
 
     fetchRightsData();
-  }, [empCode, token]);
+  }, [empCode]);
 
    
   const availableRights = useMemo(() => {
@@ -79,7 +76,7 @@ function RightsMapping() {
  
   const handleSubmit = async () => {
     try {
-      await assignEmployeeRights(empCode, selectedRight, token);
+      await assignEmployeeRights(empCode, selectedRight);
       setMessage('Rights assigned successfully.');
       setMessageType('success');
     } catch (error) {

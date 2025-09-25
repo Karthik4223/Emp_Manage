@@ -9,8 +9,8 @@ import { useEmployeeRequestService } from "../../services/employeeRequestService
 
 function EmployeeRequest() {
   const { getAllEmployeeRequests, updateEmployeeRequestStatus } = useEmployeeRequestService();
-  const { rightsNames, token } = useContext(AuthContext) || [];
-  console.log("Rights in EmployeeRequest:", rightsNames);
+  const { rightsNames } = useContext(AuthContext) || [];
+  const { username } = useContext(AuthContext);
   const [employeeRequests, setEmployeeRequests] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
@@ -40,13 +40,13 @@ function EmployeeRequest() {
 
   const fetchEmployeeRequests = useCallback(async () => {
     try {
-      const { data } = await getAllEmployeeRequests(token);
+      const { data } = await getAllEmployeeRequests();
       setEmployeeRequests(data);
       } catch (error) {
         setMessage("Error fetching employee requests.");
         setMessageType("error");
       }
-    }, [token,getAllEmployeeRequests]);
+    }, [getAllEmployeeRequests]);
 
     useEffect(() => {
       fetchEmployeeRequests();
@@ -56,7 +56,7 @@ function EmployeeRequest() {
 
   const handleRequest = async (empRequestId, action) => {
     try {
-      await updateEmployeeRequestStatus(empRequestId, action, token);
+      await updateEmployeeRequestStatus(empRequestId, action, username);
       setMessage(`Request ${action.toLowerCase()} successfully.`);
       setMessageType("success");
       fetchEmployeeRequests();

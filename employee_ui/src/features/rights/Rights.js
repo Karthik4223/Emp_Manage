@@ -3,17 +3,17 @@ import { useState,useEffect,useCallback } from "react";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRightsService } from "../../services/rightsService";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { useRightsService } from "../../services/rightsService";
 
 
 function Rights() {
   const { getAllRights, updateRightStatus } = useRightsService();
-  const { token } = useContext(AuthContext);
   const [rights, setRights] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
+  const { username } = useContext(AuthContext);
 
   useEffect(() => {
     if (message) {
@@ -39,13 +39,13 @@ function Rights() {
 
    const fetchRights = useCallback(async () => {
     try {
-      const data = await getAllRights(token);
+      const data = await getAllRights();
       setRights(data);
     } catch (err) {
       setMessage(err || "Error fetching rights");
       setMessageType("error");
     }
-  }, [token]);
+  }, [getAllRights]);
 
    useEffect(() => {
     fetchRights();
@@ -54,7 +54,7 @@ function Rights() {
   const handleStatusChange = async (rightCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
-      await updateRightStatus(rightCode, newStatus, token);
+      await updateRightStatus(rightCode, newStatus, username);
       setMessage(`Right: ${rightCode} ${currentStatus.toLowerCase()}d successfully.`);
       setMessageType("success");
       fetchRights();

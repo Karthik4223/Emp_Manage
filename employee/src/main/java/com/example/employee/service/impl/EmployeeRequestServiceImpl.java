@@ -40,7 +40,7 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			Validate.validateEmployeeRequest(employeeRequest);
 			employeeRequest.setEmpRequestStatus(EmployeeRequestStatus.CREATED);
 			employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
-			employeeRequest.setCreatedBy("ADMIN");
+//			employeeRequest.setCreatedBy("ADMIN");
 			return employeeRequestRepo.addEmployeeRequest(employeeRequest);
 		}catch (DataIntegrityViolationException e) {
 			log.error(e.getMessage(),e);
@@ -178,6 +178,38 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			log.error(e.getMessage(),e);
 	        throw new EmployeeException("Failed to delete employee");
 	    }
+	}
+
+	@Override
+	public boolean addEmployeeRequests(List<EmployeeRequest> employees) throws EmployeeException {
+		try {
+			for(EmployeeRequest employeeRequest:employees) {
+				Validate.validateEmployeeRequest(employeeRequest);
+				employeeRequest.setEmpRequestStatus(EmployeeRequestStatus.CREATED);
+				employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
+			}
+			return employeeRequestRepo.addEmployeeRequests(employees);
+			
+		}catch (DataIntegrityViolationException e) {
+			log.error(e.getMessage(),e);
+	        Throwable rootCause = e.getRootCause();
+	        String message = rootCause != null ? rootCause.getMessage() : e.getMessage();
+	        String column = "unknown column";
+	        if (message != null) {
+	            int idx = message.indexOf("for key");
+	            if (idx != -1) {
+	                column = message.substring(idx + 8).replaceAll("['`]", "").trim();
+	            }
+	        }
+	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
+		}catch (EmployeeException e) {
+			log.error(e.getMessage(),e);
+	        throw e;
+	    } catch (Exception e) {
+			log.error(e.getMessage(),e);
+	        throw new EmployeeException("Failed to add Employee Request");
+	    }
+			
 	}
 
 }

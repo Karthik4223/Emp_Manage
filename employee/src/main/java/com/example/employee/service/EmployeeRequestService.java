@@ -18,4 +18,6 @@ public interface EmployeeRequestService {
 
 	boolean deleteEmployeeRequest(Integer emp_RequestId) throws EmployeeException;
 
+	boolean addEmployeeRequests(List<EmployeeRequest> employees) throws EmployeeException;
+
 }

@@ -21,6 +21,7 @@ public class EmployeeMapperFromEmployeeRequest {
 		employee.setCity(employeeRequest.getCity());
 		employee.setState(employeeRequest.getState());
 		employee.setEmployeeStatus(Status.ACTIVE);
+		employee.setCreatedBy(employeeRequest.getCreatedBy());
 		
 		return employee;
 		

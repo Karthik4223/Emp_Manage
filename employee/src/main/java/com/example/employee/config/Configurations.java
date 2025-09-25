@@ -5,6 +5,7 @@ import javax.jms.ConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,11 +25,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Configuration
 public class Configurations {
 	
-	private static final String SOLR_URL= "http://localhost:8983/solr";
+    @Value("${spring.data.solr.host}")
+    private String SOLR_URL;
+
+	@Value("${spring.activemq.broker-url}")
+	private String brokerUrl;
 	
-	private String brokerUrl = "tcp://localhost:61616";
-	
-		@Bean
+	@Bean
 	public SolrClient solrClient() {
 		return new HttpSolrClient.Builder(SOLR_URL).build();
 	}

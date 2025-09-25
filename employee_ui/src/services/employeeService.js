@@ -1,42 +1,5 @@
 import axios from "axios";
 
-// const API_BASE_URL = "/employee";
-
-// export const getAllEmployees = (token) => {
-//   return axios.get(`${API_BASE_URL}/getAllEmployees`, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-// };
-
-// export const updateEmployeeStatus = (empCode, newStatus, token) => {
-//   return axios.put(
-//     `${API_BASE_URL}/updateEmpStatus/${empCode}?newStatus=${newStatus}&updatedBy=XYZ`,
-//     {},
-//     { headers: { Authorization: `Bearer ${token}` } }
-//   );
-// };
-
-// export const searchEmployees = (payload, token) => {
-//   return axios.post(`${API_BASE_URL}/search`, payload, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-// };
-
-// export const updateEmployee = async (employeeData, token) => {
-//   try {
-//     const response = await axios.put('/employee/updateEmployee', employeeData, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         Authorization: `Bearer ${token}`
-//       }
-//     });
-//     return response.data;
-//   } catch (error) {
-//     throw error.response?.data || error.message;
-//   }
-// };
-
-
 import { useApi } from "./useApi";
 
 export const useEmployeeService = () => {
@@ -47,9 +10,9 @@ export const useEmployeeService = () => {
     return response.data;
   };
 
-  const updateEmployeeStatus = async (empCode, newStatus) => {
+  const updateEmployeeStatus = async (empCode, newStatus, updatedBy) => {
     const response = await api.put(
-      `/updateEmpStatus/${empCode}?newStatus=${newStatus}&updatedBy=XYZ`
+      `/updateEmpStatus/${empCode}?newStatus=${newStatus}&updatedBy=${updatedBy}`
     );
     return response.data;
   };

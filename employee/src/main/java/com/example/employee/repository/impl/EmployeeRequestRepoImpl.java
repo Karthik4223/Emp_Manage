@@ -1,11 +1,14 @@
 package com.example.employee.repository.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import com.example.employee.enums.EmployeeRequestStatus;
@@ -118,6 +121,23 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 		return rowsEffected>0;
 		
 		
+	}
+
+	@Override
+	public boolean addEmployeeRequests(List<EmployeeRequest> employees) {
+		String sqlString = "Insert into EmployeeRequests(email,department,name,phone_number,gender,country,state,city,emp_RequestStatus,createdDateTime,updatedDateTime,createdBy) values "
+				+ "(:email,:department,:name,:phone_number,:gender,:country,:state,:city,:emp_RequestStatus,:createdDateTime,:updatedDateTime,:createdBy)";
+		
+	    List<SqlParameterSource> batchParams = new ArrayList<>();
+		
+		for(EmployeeRequest employeeRequest : employees) {
+			
+			MapSqlParameterSource param = SqlParamSourceForEmployeeRequest.getParam(employeeRequest);
+			batchParams.add(param);
+		}
+        
+		int[] updateCounts = namedParameterJdbcTemplate.batchUpdate(sqlString, batchParams.toArray(new SqlParameterSource[0]));
+	    return Arrays.stream(updateCounts).anyMatch(count -> count > 0);
 	}
 
 

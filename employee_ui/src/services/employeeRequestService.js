@@ -5,10 +5,18 @@ export const useEmployeeRequestService = () => {
 
   const createEmployee = (data) => api.post("/addEmployeeRequest", data);
   const getAllEmployeeRequests = () => api.get("/getAllEmployeeRequests");
-  const updateEmployeeRequestStatus = (empRequestId, action) =>
+  const updateEmployeeRequestStatus = (empRequestId, action, updatedBy) =>
     api.put(
-      `/updateEmployeeRequestStatus/${empRequestId}?newStatus=${action}&updatedBy=XYZ`
+      `/updateEmployeeRequestStatus/${empRequestId}?newStatus=${action}&updatedBy=${updatedBy}`
     );
 
-  return { createEmployee, getAllEmployeeRequests, updateEmployeeRequestStatus };
+    const uploadEmployeeExcel = async (formData, username) => {
+    return await api.post(`/upload-excel?createdBy=${username}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  };
+
+  return { createEmployee, getAllEmployeeRequests, updateEmployeeRequestStatus, uploadEmployeeExcel };
 };

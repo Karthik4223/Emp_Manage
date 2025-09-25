@@ -36,7 +36,6 @@ public class RightsServiceImpl implements RightsService{
 			rights.setRightCode(genRightCode());
 			rights.setRightStatus(Status.ACTIVE);
 			rights.setRightCreatedDateTime(LocalDateTime.now());
-			rights.setCreatedBy("ADMIN");
 			Validate.validateRights(rights);
 			
 			boolean res= rightsRepo.addRights(rights);
