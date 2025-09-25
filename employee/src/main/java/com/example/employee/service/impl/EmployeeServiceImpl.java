@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
+import com.example.employee.helpers.MessageCauseForException;
 import com.example.employee.model.Employee;
 import com.example.employee.model.SearchCriteria;
 import com.example.employee.repository.EmployeeRepo;
@@ -80,15 +81,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 			return res;
 		}catch (DataIntegrityViolationException e) {
 			log.error(e.getMessage(),e);
-	        Throwable rootCause = e.getRootCause();
-	        String message = rootCause != null ? rootCause.getMessage() : e.getMessage();
-	        String column = "unknown column";
-	        if (message != null) {
-	            int idx = message.indexOf("for key");
-	            if (idx != -1) {
-	                column = message.substring(idx + 8).replaceAll("['`]", "").trim();
-	            }
-	        }
+	        String column = MessageCauseForException.getMessageCause(e);
 	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
