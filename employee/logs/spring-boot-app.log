@@ -10112,3 +10112,32 @@ com.example.employee.customException.EmployeeException: Search Failed
 17:36:43.695 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 17:36:43.696 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
 17:43:17.470 [http-nio-8080-exec-7] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize value of type `com.example.employee.enums.Status` from String "A": not one of the values accepted for Enum class: [INACTIVE, ACTIVE]; nested exception is com.fasterxml.jackson.databind.exc.InvalidFormatException: Cannot deserialize value of type `com.example.employee.enums.Status` from String "A": not one of the values accepted for Enum class: [INACTIVE, ACTIVE]<EOL> at [Source: (org.springframework.util.StreamUtils$NonClosingInputStream); line: 1, column: 19] (through reference chain: com.example.employee.model.SearchCriteria["employeeStatus"])]
+17:59:27.666 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+17:59:27.688 [Thread-29] INFO  o.a.coyote.http11.Http11NioProtocol - Pausing ProtocolHandler ["http-nio-8080"]
+17:59:27.689 [Thread-29] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+17:59:27.691 [Thread-29] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Destroying Spring FrameworkServlet 'dispatcherServlet'
+17:59:27.702 [Thread-29] WARN  o.a.c.loader.WebappClassLoaderBase - The web application [ROOT] appears to have started a thread named [Connection evictor] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ org.apache.http.impl.client.IdleConnectionEvictor$1.run(IdleConnectionEvictor.java:66)
+ java.lang.Thread.run(Thread.java:748)
+17:59:27.704 [Thread-29] INFO  o.a.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-8080"]
+17:59:27.711 [Thread-29] INFO  o.a.coyote.http11.Http11NioProtocol - Destroying ProtocolHandler ["http-nio-8080"]
+17:59:27.913 [restartedMain] INFO  c.e.employee.EmployeeApplication - Starting EmployeeApplication using Java 1.8.0_162 on developer-ThinkBook-14-G4-IAP-U2 with PID 175882 (/home/developer/eclipse-workspace/Employee_Management/employee/target/classes started by developer in /home/developer/eclipse-workspace/Employee_Management/employee)
+17:59:27.913 [restartedMain] DEBUG c.e.employee.EmployeeApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+17:59:27.913 [restartedMain] INFO  c.e.employee.EmployeeApplication - No active profile set, falling back to 1 default profile: "default"
+17:59:28.031 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+17:59:28.031 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+17:59:28.036 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 4 ms. Found 0 Redis repository interfaces.
+17:59:28.087 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+17:59:28.087 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+17:59:28.088 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+17:59:28.088 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+17:59:28.090 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+17:59:28.090 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 175 ms
+17:59:28.137 [restartedMain] DEBUG c.e.e.config.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+17:59:28.188 [restartedMain] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@24dccef7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3ac9f721, org.springframework.security.web.context.SecurityContextPersistenceFilter@15a83925, org.springframework.security.web.header.HeaderWriterFilter@857313d, org.springframework.security.web.authentication.logout.LogoutFilter@116bbf0e, com.example.employee.config.JwtAuthenticationFilter@5194bbf9, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@473975ca, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@76d67ac9, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6e73ca3c, org.springframework.security.web.session.SessionManagementFilter@49ff488a, org.springframework.security.web.access.ExceptionTranslationFilter@1b692547, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@dbda0d7]
+17:59:28.264 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+17:59:28.268 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+17:59:28.270 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+17:59:28.286 [restartedMain] INFO  c.e.employee.EmployeeApplication - Started EmployeeApplication in 0.395 seconds (JVM running for 4922.964)
+17:59:28.288 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged

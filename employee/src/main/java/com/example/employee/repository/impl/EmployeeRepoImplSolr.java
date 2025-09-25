@@ -298,7 +298,6 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 		}
 
 		String queryString = queryParts.isEmpty() ? "*:*" : String.join(" OR ", queryParts);
-		System.out.println("Final Solr query: " + queryString);
 
 		solrQuery.setQuery(queryString);
 		solrQuery.setRows(10000);
