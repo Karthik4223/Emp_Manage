@@ -240,84 +240,69 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 	public List<Employee> findByCriteria(SearchCriteria criteria) throws EmployeeException {
 		SolrQuery solrQuery = new SolrQuery();
 
-        List<String> query = new ArrayList<>();
+		List<String> queryParts = new ArrayList<>();
 
-        if (criteria.getEmployeeNames() != null && !criteria.getEmployeeNames().isEmpty()) {
-        	
-            String namesQuery = criteria.getEmployeeNames().stream()
-						                .map(name -> "name:*" + name + "*")
-						                .collect(Collectors.joining(" OR "));
-            
-            query.add("(" + namesQuery + ")");
-        }
-        
-        if (criteria.getEmployeeDepartment() != null && !criteria.getEmployeeDepartment().isEmpty()) {
-        	
-            String depQuery = criteria.getEmployeeDepartment().stream()
-						                .map(department -> "department:*" + department + "*")
-						                .collect(Collectors.joining(" OR "));
-            
-            query.add("(" + depQuery + ")");
-        }
-        
-        if (criteria.getEmployeeStatus() != null) {
-        	
-            String statusQuery = "emp_status:*" + criteria.getEmployeeStatus().getCode() + "*";
-            query.add("(" + statusQuery + ")");
-        }
-        
-        if (criteria.getEmployeeEmail() != null && !criteria.getEmployeeEmail().isEmpty()) {
-        	
-            String emailQuery = criteria.getEmployeeEmail().stream()
-						                .map(email -> "email:*" + email + "*")
-						                .collect(Collectors.joining(" OR "));
-            
-            query.add("(" + emailQuery + ")");
-        }
-        
-        if (criteria.getEmployeeCode() != null && !criteria.getEmployeeCode().isEmpty()) {
-        	
-            String empCodeQuery = criteria.getEmployeeCode().stream()
-						                .map(emp_code -> "emp_code:*" + emp_code + "*")
-						                .collect(Collectors.joining(" OR "));
-            
-            query.add("(" + empCodeQuery + ")");
-        }
-        
-        
-        if (criteria.getEmployeePhoneNumber() != null && !criteria.getEmployeePhoneNumber().isEmpty()) {
-        	
-            String phoneNumberQuery = criteria.getEmployeePhoneNumber().stream()
-						                .map(phone_number -> "phone_number:*" + phone_number + "*")
-						                .collect(Collectors.joining(" OR "));
-            
-            query.add("(" + phoneNumberQuery + ")");
-        }
-        
-        
-        if (criteria.getSearchKey() != null && !criteria.getSearchKey().isEmpty()) {
-            String searchKey = criteria.getSearchKey().trim();
+		if (criteria.getEmployeeNames() != null && !criteria.getEmployeeNames().isEmpty()) {
+		    String namesQuery = criteria.getEmployeeNames().stream()
+		                        .map(name -> "name:*" + name + "*")
+		                        .filter(s -> !s.isEmpty())
+		                        .collect(Collectors.joining(" OR "));
+		    if (!namesQuery.isEmpty()) queryParts.add(namesQuery);
+		}
 
-            String[] tokens = searchKey.split("\\s*\\|\\s*|\\s+");
+		if (criteria.getEmployeeDepartment() != null && !criteria.getEmployeeDepartment().isEmpty()) {
+		    String depQuery = criteria.getEmployeeDepartment().stream()
+		                        .map(dep -> "department:*" + dep + "*")
+		                        .filter(s -> !s.isEmpty())
+		                        .collect(Collectors.joining(" OR "));
+		    if (!depQuery.isEmpty()) queryParts.add(depQuery);
+		}
 
-            List<String> tokenQueries = new ArrayList<>();
-            for (String token : tokens) {
-                if (!token.isEmpty()) {
-                    tokenQueries.add("(name:*" + token + "* OR email:*" + token + "* OR emp_code:*" + token + "*)");
-                }
-            }
+		if (criteria.getEmployeeStatus() != null) {
+		    queryParts.add("emp_status:*" + criteria.getEmployeeStatus().getCode() + "*");
+		}
 
-            if (!tokenQueries.isEmpty()) {
-                query.add("(" + String.join(" OR ", tokenQueries) + ")");
-            }
-        }
+		if (criteria.getEmployeeEmail() != null && !criteria.getEmployeeEmail().isEmpty()) {
+		    String emailQuery = criteria.getEmployeeEmail().stream()
+		                        .map(email -> "email:*" + email + "*")
+		                        .filter(s -> !s.isEmpty())
+		                        .collect(Collectors.joining(" OR "));
+		    if (!emailQuery.isEmpty()) queryParts.add(emailQuery);
+		}
 
+		if (criteria.getEmployeeCode() != null && !criteria.getEmployeeCode().isEmpty()) {
+		    String codeQuery = criteria.getEmployeeCode().stream()
+		                        .map(code -> "emp_code:*" + code + "*")
+		                        .filter(s -> !s.isEmpty())
+		                        .collect(Collectors.joining(" OR "));
+		    if (!codeQuery.isEmpty()) queryParts.add(codeQuery);
+		}
 
-        
-        String queryString = !query.isEmpty() ? String.join(" AND ", query) : "*:*";
+		if (criteria.getEmployeePhoneNumber() != null && !criteria.getEmployeePhoneNumber().isEmpty()) {
+		    String phoneQuery = criteria.getEmployeePhoneNumber().stream()
+		                        .map(phone -> "phone_number:*" + phone + "*")
+		                        .filter(s -> !s.isEmpty())
+		                        .collect(Collectors.joining(" OR "));
+		    if (!phoneQuery.isEmpty()) queryParts.add(phoneQuery);
+		}
 
-        solrQuery.setQuery(queryString);
-        solrQuery.setRows(10000);
+		if (criteria.getSearchKey() != null && !criteria.getSearchKey().isEmpty()) {
+		    String[] tokens = criteria.getSearchKey().trim().split("\\s*\\|\\s*|\\s+");
+		    List<String> tokenQueries = new ArrayList<>();
+		    for (String token : tokens) {
+		        if (!token.isEmpty()) {
+		            tokenQueries.add("name:*" + token + "* OR email:*" + token + "* OR emp_code:*" + token + "*");
+		        }
+		    }
+		    if (!tokenQueries.isEmpty()) queryParts.add(String.join(" OR ", tokenQueries));
+		}
+
+		String queryString = queryParts.isEmpty() ? "*:*" : String.join(" OR ", queryParts);
+		System.out.println("Final Solr query: " + queryString);
+
+		solrQuery.setQuery(queryString);
+		solrQuery.setRows(10000);
+
 
         QueryResponse response = null;
 		try {

@@ -35,6 +35,9 @@ function Employee({onNavigate}) {
   const [phoneOptions, setPhoneOptions] = useState([]);
   const [empCodeOptions, setEmpCodeOptions] = useState([]);
   const [searchKeyOptions, setSearchKeyOptions] = useState([]);
+  const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([]);
+
 
   
   const fetchEmployeeDetails = useCallback(async () => {
@@ -76,25 +79,28 @@ function Employee({onNavigate}) {
   }
 
     const fetchFilteredEmployees = async () => {
-    const payload = {
-      employeeNames: filterData.name ? [filterData.name] : [],
-      employeeEmail: filterData.email ? [filterData.email] : [],
-      employeePhoneNumber: filterData.phoneNumber ? [filterData.phoneNumber] : [],
-      employeeDepartment: filterData.empDepartment ? [filterData.empDepartment] : [],
-      searchKey: filterData.searchKey || "",
-      employeeStatus: filterData.employeeStatus || null,
-      employeeCode: filterData.employeeCode ? [filterData.employeeCode] : [],
+      const payload = {};
+
+      if (filterData.name) payload.employeeNames = [filterData.name];
+      if (filterData.email) payload.employeeEmail = [filterData.email];
+      if (filterData.phoneNumber) payload.employeePhoneNumber = [filterData.phoneNumber];
+      if (filterData.employeeCode) payload.employeeCode = [filterData.employeeCode];
+      if (filterData.empDepartment) payload.employeeDepartment = [filterData.empDepartment];
+      if (filterData.searchKey) payload.searchKey = filterData.searchKey;
+      if (filterData.employeeStatus) payload.employeeStatus = filterData.employeeStatus;
+
+      try {
+        console.log("Applying filter with data:", payload);
+        const data = await searchEmployees(payload, token);
+        console.log("Filtered employees:", data);
+        setEmployeeDetails(data.data);
+        toast.success("Filter applied successfully.");
+      } catch (error) {
+        console.error(error);
+        toast.error(error?.response?.data?.message || "Failed to apply filter.");
+      }
     };
 
-    try {
-      const data = await searchEmployees(payload);
-      setEmployeeDetails(data);
-      toast.success("Filter applied successfully.");
-    } catch (error) {
-      console.error(error);
-      toast.error(error || "Failed to apply filter.");
-    }
-  };
 
   const clearedSearch = {
     name: '',
@@ -184,7 +190,7 @@ function Employee({onNavigate}) {
                     setIsLoading(true);
                     const payload = { employeeNames: [query] };
                     const { data } = await searchEmployees(payload, token);
-                    setEmployeeDetails(data);
+                    // setEmployeeDetails(data);
                     setNameOptions(data.map((emp) => emp.name));
                     
                   } catch (error) {
@@ -194,7 +200,9 @@ function Employee({onNavigate}) {
                     setIsLoading(false);
                   }
                 }}
-                onChange={(selected) => setFilterData({ ...filterData, name: selected[0] || '' })}
+                onChange={(selected) =>
+                    setFilterData((prev) => ({ ...prev, name: selected[0] || '' }))
+                  }
                 options={nameOptions || []}
                 placeholder="Type to search..."
               />
@@ -216,14 +224,14 @@ function Employee({onNavigate}) {
                   try {
                     const payload = { employeeEmail: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    setEmployeeDetails(data);
+                    // setEmployeeDetails(data);
                     setEmailOptions(data.map((emp) => emp.email));
                     
                   } catch (error) {
                     console.error(error);
                   }
                 }}
-                onChange={(selected) => setFilterData({ ...filterData, email: selected[0] || '' })}
+                onChange={(selected) => setFilterData((prev) => ({ ...prev, email: selected[0] || '' }))}
                 options={emailOptions || []}
                 placeholder="Type to search..."
               />
@@ -245,14 +253,14 @@ function Employee({onNavigate}) {
                   try {
                     const payload = { employeePhoneNumber: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    setEmployeeDetails(data);
+                    // setEmployeeDetails(data);
                     setPhoneOptions(data.map((emp) => emp.phoneNumber));
                     
                   } catch (error) {
                     console.error(error);
                   }
                 }}
-                onChange={(selected) => setFilterData({ ...filterData, phoneNumber: selected[0] || '' })}
+                onChange={(selected) => setFilterData((prev) => ({ ...prev, phoneNumber: selected[0] || '' }))}
                 options={phoneOptions || []}
                 placeholder="Type to search..."
               />
@@ -274,14 +282,14 @@ function Employee({onNavigate}) {
                   try {
                     const payload = { employeeCode: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    setEmployeeDetails(data);
+                    // setEmployeeDetails(data);
                     setEmpCodeOptions(data.map((emp) => emp.empCode));
                     
                   } catch (error) {
                     console.error(error);
                   }
                 }}
-                onChange={(selected) => setFilterData({ ...filterData, employeeCode: selected[0] || '' })}
+                onChange={(selected) => setFilterData((prev) => ({ ...prev, employeeCode: selected[0] || '' }))}
                 options={empCodeOptions || []}
                 placeholder="Type to search..."
               />
@@ -303,16 +311,17 @@ function Employee({onNavigate}) {
                   try {
                     const payload = { employeeDepartment: [query] };
                     const { data } = await searchEmployees(payload, token);
-                    setEmployeeDetails(data);
-                    setEmpCodeOptions([...new Set(data.map((emp) => emp.empDepartment))]);
+                    // setEmployeeDetails(data);
+                    setDepartmentOptions([...new Set(data.map((emp) => emp.empDepartment))]);
                   } catch (error) {
                     console.error(error);
                   }
                 }}
+
                 onChange={(selected) =>
-                  setFilterData({ ...filterData, empDepartment: selected[0] || '' })
+                  setFilterData((prev) => ({ ...prev, empDepartment: selected[0] || '' }))
                 }
-                options={empCodeOptions || []}
+                options={departmentOptions || []}
                 placeholder="Search department..."
               />
             </div>
@@ -324,23 +333,28 @@ function Employee({onNavigate}) {
                 id="status-search"
                 isLoading={false}
                 minLength={1}
-                labelKey={(option) => option}
-                onSearch={(query) => {
+                labelKey="empStatus"
+                onSearch={ async(query) => {
                   if (!query) {
                     fetchEmployeeDetails();
                     return;
                   }
-                  const statuses = ["ACTIVE", "INACTIVE"];
-                  setSearchKeyOptions(
-                    statuses.filter((s) =>
-                      s.toLowerCase().includes(query.toLowerCase())
-                    )
-                  );
+
+                  try {
+                    const payload = { employeeStatus: query };
+                    const { data } = await searchEmployees(payload, token);
+                    // setEmployeeDetails(data);
+                    setStatusOptions([...new Set(data.map((emp) => emp.employeeStatus))]);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                  
                 }}
+
                 onChange={(selected) =>
-                  setFilterData({ ...filterData, employeeStatus: selected[0] || '' })
+                  setFilterData((prev) => ({ ...prev, employeeStatus: selected[0] || '' }))
                 }
-                options={searchKeyOptions || []}
+                options={statusOptions || []}
                 placeholder="Search status..."
               />
             </div>
@@ -366,7 +380,7 @@ function Employee({onNavigate}) {
                   
                   const payload = { searchKey: query };
                   const { data } = await searchEmployees(payload,token);
-                  setEmployeeDetails(data);
+                  // setEmployeeDetails(data);
                   setSearchKeyOptions(data);
                   
                 } catch (error) {
@@ -375,11 +389,12 @@ function Employee({onNavigate}) {
                   setIsLoading(false);
                 }
               }}
+
               onChange={(selected) =>
-                setFilterData({
-                  ...filterData,
+                setFilterData((prev) => ({
+                  ...prev,
                   searchKey: selected[0] ? (selected[0].name || selected[0].empCode || selected[0].email) : ""
-                })
+                }))
               }
               options={searchKeyOptions || []}
               placeholder="Search by name, emp code, or email..."
@@ -389,6 +404,7 @@ function Employee({onNavigate}) {
             <div className="custom-form-group-button" style={{ marginTop: '10px' }}>
               <button
                 onClick={() => {
+                  console.log('Applying filter with data:', filterData);
                   setFilterPopupOpen(false);
                   fetchFilteredEmployees();
                 }}

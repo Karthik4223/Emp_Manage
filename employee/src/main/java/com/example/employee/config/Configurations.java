@@ -3,6 +3,7 @@ package com.example.employee.config;
 import javax.jms.ConnectionFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,9 +64,20 @@ public class Configurations {
 	    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 	    factory.setConnectionFactory(connectionFactory);
 	    factory.setPubSubDomain(false); 
+	    factory.setSessionTransacted(true);
+	    
+	    if (connectionFactory instanceof ActiveMQConnectionFactory) {
+	        ActiveMQConnectionFactory amqFactory = (ActiveMQConnectionFactory) connectionFactory;
+	        RedeliveryPolicy policy = new RedeliveryPolicy();
+	        policy.setMaximumRedeliveries(3);
+	        policy.setInitialRedeliveryDelay(2000);
+	        policy.setBackOffMultiplier(2);
+	        policy.setUseExponentialBackOff(true);
+	        amqFactory.setRedeliveryPolicy(policy);
+	    }
+	    
 	    return factory;
 	}
-	
 	
 	@Bean
     public ObjectMapper redisObjectMapper() {

@@ -54,6 +54,8 @@ public class EmployeeListener {
 	
 	@JmsListener(destination = "employee-queue",selector = "JMSType ='Approved'")
 	public void receiveMessagefromEmployeeRequest(MapMessage message) throws EmployeeException {
+		
+//		throw new EmployeeException("");
 		Integer emp_RequestId;
 		try {
 			emp_RequestId = message.getInt("emp_RequestId");

@@ -42,7 +42,7 @@ public class EmployeeExcelService {
                 emp.setEmail(getCellValue(row, 0).trim());
                 emp.setName(getCellValue(row, 1).trim());
                 emp.setPhoneNumber(getCellValue(row, 2).trim());
-                emp.setGender(Gender.valueOf(getCellValue(row, 3).toUpperCase().trim()));
+                emp.setGender(Gender.valueOf(getCellValue(row, 3).trim().toUpperCase()));
                 emp.setEmpDepartment(getCellValue(row, 4).trim());
                 emp.setCountry(getCellValue(row, 5).trim());
                 emp.setState(getCellValue(row, 6).trim());
