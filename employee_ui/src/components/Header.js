@@ -1,9 +1,11 @@
-import React, { useContext, useState} from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import profile from "../assets/pro.png";
+import { FaChevronDown } from "react-icons/fa";
 
 function Header() {
-  const { isLoggedIn, logout, username } = useContext(AuthContext);
+  const { isLoggedIn, logout, username, empCode } = useContext(AuthContext);
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
 
@@ -15,15 +17,28 @@ function Header() {
 
   return (
     <header className="header">
-      <h3>Employee Management System</h3>
+      <h3 className="logo">Employee Management System</h3>
+
       {isLoggedIn && (
         <div className="profile-container">
+
           <div
-            className="profile-name"
+            className="profile-img"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            {username}
+            <img src={profile} alt="Profile" />
           </div>
+
+          <div className="profile-info" onClick={() => setShowDropdown(!showDropdown)}>
+            <span className="username">{username}</span>
+            <span className="empcode">{empCode}</span>
+          </div>
+
+          <FaChevronDown
+            className="dropdown-arrow"
+            onClick={() => setShowDropdown(!showDropdown)}
+          />
+
           {showDropdown && (
             <div className="dropdown">
               <button onClick={handleLogout}>Logout</button>

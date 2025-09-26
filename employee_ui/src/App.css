@@ -16,26 +16,81 @@
   left: 0;
   width: 100%;
   height: 60px;
-  background-color: whitesmoke;
-  padding: 5px 20px;
+  background: #1e293b;
+  color: white;
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 100;
 }
 
+
+.logo {
+  font-size: 18px;
+}
+
 .profile-container {
+  display: flex;
+  align-items: center;
   position: relative;
   cursor: pointer;
 }
 
-.profile-name {
-  padding: 5px 10px;
-  border-radius: 5px;
-  background-color: #e9ecef;
+.profile-img img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  text-align: left;
+}
+
+.username {
+  font-weight: 600;
+}
+
+.empcode {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.dropdown-arrow {
+  margin-left: 8px;
+  font-size: 14px;
 }
 
 .dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: white;
+  color: black;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  padding: 5px 0;
+  z-index: 100;
+}
+
+.dropdown button {
+  background: none;
+  border: none;
+  padding: 8px 15px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown button:hover {
+  background: #f1f5f9;
+}
+
+
+/* .dropdown {
   position: absolute;
   top: 35px;
   right: 0;
@@ -56,7 +111,7 @@
 
 .dropdown-item:hover {
   background-color: #f1f1f1;
-}
+} */
 
 
 .main-layout {

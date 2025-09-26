@@ -102,21 +102,8 @@ function Employee({onNavigate}) {
     };
 
 
-  const clearedSearch = {
-    name: '',
-    email: '',
-    phoneNumber: '',
-    employeeCode: '',
-    empDepartment: '',
-    employeeStatus: '',
-    searchKey: '',
-  };
- 
-
   return (
     <div className="content">
-
-
     <button className="filter-button" onClick={() => setFilterPopupOpen(true)} style={{ marginBottom: '10px' }}>
       Filter Employees
     </button>
