@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.employee.model.EmployeeRights;
@@ -28,10 +29,10 @@ public class EmployeeRightsController {
 	private EmployeeRightsService employeeRightsService;
 	
 	@PostMapping("/addEmployeeRights")
-	public ResponseEntity<String> addEmployeeRights(@RequestBody EmployeeRights employeeRights){
+	public ResponseEntity<String> addEmployeeRights(@RequestBody EmployeeRights employeeRights, @RequestParam String group, @RequestParam String createdBy){
 		boolean res;
 		try {
-			res = employeeRightsService.addEmployeeRights(employeeRights);
+			res = employeeRightsService.addEmployeeRights(employeeRights,group,createdBy);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

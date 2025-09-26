@@ -22,5 +22,5 @@ public interface RightsRepo {
 	boolean logRights(Rights right);
 
 	Integer getRightId();
-
+	
 }

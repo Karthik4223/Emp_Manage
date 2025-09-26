@@ -15,4 +15,5 @@ public interface EmployeeRightsMappingRepo {
 	boolean deleteEmployeeRights(String emp_code, List<String> rightCodes);
 
 	boolean logEmployeeRights(EmployeeRights employeeRights);
+
 }

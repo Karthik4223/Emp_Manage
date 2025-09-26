@@ -13,7 +13,8 @@ function CreateRight() {
 
     const [Right, setRight] = useState({
         rightName: '',
-        createdBy: username
+        createdBy: username,
+        group: ''
     });
 
     const [message, setMessage] = useState('');
@@ -43,7 +44,7 @@ function CreateRight() {
             await createRight(Right);
             setMessage("Right created successfully.");
             setMessageType("success");
-            setRight({ rightName: "" });
+            setRight({ rightName: "", group: "" });
         } catch (err) {
             setMessage(err || "Error creating right.");
             setMessageType("error");
@@ -63,6 +64,20 @@ function CreateRight() {
                 <label htmlFor="rightName">Right Name:</label>
                 <input type="text" id="rightName" name="rightName" required value={Right.rightName} onChange={handleChange} />
             </div>
+
+            <div className="custom-form-group">
+            <label>Group:</label>
+            <select className="form-control" name="group" onChange={handleChange} value={Right.group} required>
+              <option value="">Select group</option>
+              <option value="EMPLOYEE">Employee</option>
+              <option value="MANAGER">Manager</option>
+              <option value="ASSISTANTMANAGER">Assistant Manager</option>
+              <option value="HR">HR</option>
+              <option value="ADMIN">Admin</option>
+              <option value="SUPERADMIN">Super Admin</option>
+              <option value="USER">User</option>
+            </select>
+          </div>
            
             <div className="custom-form-group-button">
                 <button type="submit">Create Right</button>

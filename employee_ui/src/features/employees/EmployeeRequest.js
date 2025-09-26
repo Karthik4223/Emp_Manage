@@ -50,7 +50,7 @@ function EmployeeRequest() {
 
     useEffect(() => {
       fetchEmployeeRequests();
-    }, [fetchEmployeeRequests]);
+    }, []);
 
 
 

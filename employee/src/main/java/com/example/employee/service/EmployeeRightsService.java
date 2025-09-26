@@ -6,7 +6,7 @@ import com.example.employee.customException.EmployeeException;
 import com.example.employee.model.EmployeeRights;
 
 public interface EmployeeRightsService {
-	boolean addEmployeeRights(EmployeeRights employeeRights) throws EmployeeException;
+	boolean addEmployeeRights(EmployeeRights employeeRights, String group, String createdBy) throws EmployeeException;
 
 	List<EmployeeRights> getAllEmployeeRights();
 	

@@ -23,8 +23,8 @@ public class RightsRepoImpl implements RightsRepo{
 	@Override
 	public boolean addRights(Rights rights) {
 		
-		String sqlString = "Insert into Rights (right_code,right_name,right_status,createdDateTime,createdBy) values "
-				+ "(:right_code,:right_name,:right_status,:createdDateTime,:createdBy)";
+		String sqlString = "Insert into Rights (right_code,right_name,right_status,right_group,createdDateTime,createdBy) values "
+				+ "(:right_code,:right_name,:right_status,:right_group,:createdDateTime,:createdBy)";
 		
 		MapSqlParameterSource param = SqlParamSoucreForRights.getParam(rights);
 		
@@ -35,14 +35,14 @@ public class RightsRepoImpl implements RightsRepo{
 
 	@Override
 	public List<Rights> getAllRights() {
-		String sqlString = "Select right_code,right_name,right_status,createdDateTime,updatedDateTime,createdBy,updatedBy from Rights";
+		String sqlString = "Select right_code,right_name,right_status,right_group,createdDateTime,updatedDateTime,createdBy,updatedBy from Rights";
 		
 		return namedParameterJdbcTemplate.query(sqlString, new RightsRowMapper());
 	}
 	
 	@Override
 	public Rights getRightById(String right_code) {
-		String sqlString = "Select right_code,right_name,right_status,createdDateTime,updatedDateTime,createdBy,updatedBy from Rights "
+		String sqlString = "Select right_code,right_name,right_status,right_group,createdDateTime,updatedDateTime,createdBy,updatedBy from Rights "
 				+ "where right_code=:right_code";
 		
 		 MapSqlParameterSource param = new MapSqlParameterSource();
@@ -102,7 +102,7 @@ public class RightsRepoImpl implements RightsRepo{
 	
 	@Override
 	public boolean logRights(Rights right) {
-		String sqlRight = " Select right_id,right_code,right_name,right_status,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime from Rights "
+		String sqlRight = " Select right_id,right_code,right_name,right_status,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime,right_group from Rights "
 				+ "where right_code=:right_code";
 		
 		

@@ -47,12 +47,12 @@ function Employee({onNavigate}) {
   } catch (error) {
     toast.error("Error fetching employee details.");
   } 
-  }, []);
+  }, [getAllEmployees]);
 
 
     useEffect(() => {
       fetchEmployeeDetails();
-    }, [fetchEmployeeDetails]);
+    }, []);
 
   const handleEdit = (empCode) => {
     const emp = employeeDetails.find((e) => e.empCode === empCode);
@@ -183,7 +183,7 @@ function Employee({onNavigate}) {
                 labelKey="name"
                 onSearch={async (query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
@@ -218,7 +218,7 @@ function Employee({onNavigate}) {
                 labelKey="email"
                 onSearch={async (query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
@@ -247,7 +247,7 @@ function Employee({onNavigate}) {
                 labelKey="phoneNumber"
                 onSearch={async (query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
@@ -276,7 +276,7 @@ function Employee({onNavigate}) {
                 labelKey="empCode"
                 onSearch={async (query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
@@ -305,7 +305,7 @@ function Employee({onNavigate}) {
                 labelKey="empDepartment"
                 onSearch={async (query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
@@ -336,7 +336,7 @@ function Employee({onNavigate}) {
                 labelKey="empStatus"
                 onSearch={ async(query) => {
                   if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
 
@@ -372,7 +372,7 @@ function Employee({onNavigate}) {
               }
               onSearch={async (query) => {
                 if (!query) {
-                    fetchEmployeeDetails();
+                    // fetchEmployeeDetails();
                     return;
                   }
                 try {

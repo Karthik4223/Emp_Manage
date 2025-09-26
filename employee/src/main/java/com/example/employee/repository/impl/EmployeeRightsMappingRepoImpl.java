@@ -25,6 +25,10 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 
 	@Override
 	public boolean addEmployeeRights(EmployeeRights employeeRights) {
+		
+		String sqlRightGroup = "Select right_group from Rights where right_code=:right_code";
+		
+		
 	    String sqlString = "INSERT INTO EmployeeRights(emp_code, right_code, createdDateTime, createdBy) " +
 	                       "VALUES (:emp_code, :right_code, :createdDateTime, :createdBy)";
 
@@ -143,7 +147,5 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 	    return totalRowsAffected > 0;
 	}
 
-
-	
 
 }

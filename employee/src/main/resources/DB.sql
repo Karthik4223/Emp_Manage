@@ -4,11 +4,19 @@ use employee;
 
 show tables;
 
+SELECT emp_id, COUNT(*) 
+FROM Employees 
+GROUP BY emp_id 
+HAVING COUNT(*) > 1;
+
+
 select * from EmployeeRequests;
 select * from EmployeeRequests_log;
 
 select * from Employees_log;
 select * from Employees;
+
+SELECT emp_id, emp_code, emp_password, email, department, name, phone_number, gender, country, state, city, emp_status, createdDateTime, updatedDateTime, createdBy, updatedBy, sysTime FROM Employees;
 
 
 select * from Rights;
@@ -22,6 +30,7 @@ CREATE TABLE Rights (
     right_code VARCHAR(10) UNIQUE NOT NULL , 
     right_name VARCHAR(100) UNIQUE NOT NULL,
 	right_status CHAR(1) NOT NULL, 
+    right_group VARCHAR(100) NOT NULL,
     createdDateTime DATETIME NOT NULL, 
     updatedDateTime DATETIME ,
     createdBy VARCHAR(20) NOT NULL,
@@ -73,6 +82,7 @@ CREATE TABLE Employees (
 CREATE TABLE EmployeeRights (
     emp_code VARCHAR(10),
     right_code VARCHAR(10),
+	right_group VARCHAR(100) NOT NULL,
     PRIMARY KEY(emp_code, right_code),
     FOREIGN KEY(emp_code) REFERENCES Employees(emp_code),
     FOREIGN KEY(right_code) REFERENCES Rights(right_code),
@@ -80,8 +90,9 @@ CREATE TABLE EmployeeRights (
 	createdBy VARCHAR(20) NOT NULL,
     updatedBy VARCHAR(20),
 	sysTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-
 );
+
+select * from EmployeeRights;
 
  -- Drop table Rights;
 --  Drop table Employees;
@@ -99,6 +110,7 @@ CREATE TABLE Rights_log (
     right_code VARCHAR(10)  NOT NULL , 
     right_name VARCHAR(10)  NOT NULL,
 	right_status CHAR(1), 
+    right_group VARCHAR(100),
     createdDateTime DATETIME NOT NULL, 
     updatedDateTime DATETIME ,
     createdBy VARCHAR(20) NOT NULL,

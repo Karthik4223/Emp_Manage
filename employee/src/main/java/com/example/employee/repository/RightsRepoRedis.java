@@ -18,5 +18,7 @@ public interface RightsRepoRedis {
 	boolean deleteRights(String rightCode);
 
 	Rights getRightById(String right_code);
+	
+	List<String> getRightsByGroup(String group);
 
 }

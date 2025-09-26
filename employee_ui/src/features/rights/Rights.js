@@ -49,7 +49,7 @@ function Rights() {
 
    useEffect(() => {
     fetchRights();
-  }, [fetchRights]);
+  }, []);
 
   const handleStatusChange = async (rightCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
@@ -77,6 +77,7 @@ function Rights() {
             <th>Right Code</th>
             <th>Right Name</th>
             <th>Status</th>
+            <th>Group</th>
             <th>Created Date </th>
             <th>Updated Date</th>
             <th>Created By</th>
@@ -90,6 +91,7 @@ function Rights() {
               <td>{right.rightCode}</td>
               <td>{right.rightName}</td>
               <td>{right.rightStatus}</td>
+              <td>{right.group || 'N/A'}</td>
               <td>{right.rightCreatedDateTime}</td>
               <td>{right.rightUpdatedDateTime}</td>
               <td>{right.createdBy}</td>

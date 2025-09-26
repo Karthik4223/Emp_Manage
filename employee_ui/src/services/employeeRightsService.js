@@ -8,9 +8,9 @@ export const useEmployeeRightsService = () => {
     return response.data;
   };
 
-  const assignEmployeeRights = async (empCode, rightCodes) => {
+  const assignEmployeeRights = async (empCode, rightCodes,group,username) => {
     const payload = { empCode, rightCode: rightCodes };
-    const response = await api.post("/addEmployeeRights", payload);
+    const response = await api.post(`/addEmployeeRights?group=${group}&createdBy=${username}`, payload);
     return response.data;
   };
 

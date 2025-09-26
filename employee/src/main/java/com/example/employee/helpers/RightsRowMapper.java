@@ -18,6 +18,7 @@ public class RightsRowMapper implements RowMapper<Rights>{
 		rights.setRightCode(rs.getString("right_code"));
 		rights.setRightName(rs.getString("right_name"));
 		rights.setRightStatus(rs.getString("right_status")!=null ? Status.fromCode(rs.getString("right_status")) : null);
+		rights.setGroup(rs.getString("right_group"));
 		rights.setRightCreatedDateTime(rs.getTimestamp("createdDateTime").toLocalDateTime());
 		
 		Timestamp timestamp = rs.getTimestamp("updatedDateTime");

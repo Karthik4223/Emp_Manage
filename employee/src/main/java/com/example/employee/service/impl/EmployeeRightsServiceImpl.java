@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.model.EmployeeRights;
 import com.example.employee.repository.EmployeeRightsMappingRepo;
+import com.example.employee.repository.impl.RightsRepoImplRedis;
 import com.example.employee.service.EmployeeRightsService;
 import com.example.employee.validations.Validate;
 
@@ -25,13 +26,22 @@ public class EmployeeRightsServiceImpl implements EmployeeRightsService {
 	
 	@Autowired
 	private EmployeeRightsMappingRepo employeeRightsMappingRepo;
+	
+	@Autowired
+	private RightsRepoImplRedis rightsRepoImplRedis;
 
 	@Override
-	public boolean addEmployeeRights(EmployeeRights employeeRights) throws EmployeeException {
+	public boolean addEmployeeRights(EmployeeRights employeeRights, String group,String createdBy) throws EmployeeException {
 	    try {
 	        Validate.validateEmployeeRights(employeeRights);
+	        
+	        List<String> rightsToAssign;
 
-	        List<String> rightsToAssign = employeeRights.getRightCode();
+	        if (group != null && !group.isEmpty()) {
+	            rightsToAssign = rightsRepoImplRedis.getRightsByGroup(group);
+	        } else {
+	            rightsToAssign = employeeRights.getRightCode() != null ? employeeRights.getRightCode() : Collections.emptyList();
+	        }
 	        
 	        EmployeeRights employeeRightsExisting = employeeRightsMappingRepo.getEmployeeRightsByEmpCode(employeeRights.getEmpCode());
 
@@ -72,7 +82,7 @@ public class EmployeeRightsServiceImpl implements EmployeeRightsService {
 	        if (!finalRightsToAssign.isEmpty()) {
 	            employeeRights.setRightCode(finalRightsToAssign);
 	            employeeRights.setEmpRightCreatedDateTime(LocalDateTime.now());
-	            employeeRights.setCreatedBy("ADMIN");
+	            employeeRights.setCreatedBy(createdBy);
 	            return employeeRightsMappingRepo.addEmployeeRights(employeeRights);
 	        }
 

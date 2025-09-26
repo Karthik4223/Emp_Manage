@@ -5,21 +5,27 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRightsService } from "../../services/rightsService";
 import { useEmployeeRightsService } from "../../services/employeeRightsService";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 function RightsMapping() {
   const { getAllRights } = useRightsService();
   const { getEmployeeRights, assignEmployeeRights } = useEmployeeRightsService();
   const { empCode } = useParams();
+  const { username } = useContext(AuthContext);
 
   const [allRights, setAllRights] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
-
+  const [group, setGroup] = useState('');
+  const [mode, setMode] = useState("");
   const [selectedAvailableRight, setSelectedAvailableRight] = useState(null);
   const [selectedAssignedRight, setSelectedAssignedRight] = useState(null);
 
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
 
+  // const [assignSelectedRights, setAssignSelectedRights] = useState(false);
+  // const [assignGroupRights, setAssignGroupRights] = useState(false);
 
   useEffect(() => {
     if (message) {
@@ -34,7 +40,7 @@ function RightsMapping() {
   }, [message, messageType]);
   
 
-   useEffect(() => {
+
     const fetchRightsData = async () => {
       try {
         const rights = await getAllRights();
@@ -48,9 +54,12 @@ function RightsMapping() {
       }
     };
 
+  useEffect(() => {
     fetchRightsData();
   }, [empCode]);
 
+  console.log("Selected Rights:", selectedRight);
+  console.log("All Rights:", allRights);
    
   const availableRights = useMemo(() => {
     return allRights.filter(right => !selectedRight.includes(right.rightCode));
@@ -74,14 +83,26 @@ function RightsMapping() {
   };
 
  
-  const handleSubmit = async () => {
-    try {
-      await assignEmployeeRights(empCode, selectedRight);
-      setMessage('Rights assigned successfully.');
-      setMessageType('success');
-    } catch (error) {
-      setMessage(typeof error === 'string' ? error : 'Error assigning rights.');
-      setMessageType('error');
+   const handleSubmit = async () => {
+    if (mode === "group") {
+      if (!group) return toast.error("Please select a group");
+
+      try {
+        await assignEmployeeRights(empCode, [], group, username);
+        fetchRightsData();
+        toast.success("Group rights assigned successfully");
+      } catch (error) {
+        toast.error(error || "Error assigning group rights");
+      }
+    } else if (mode === "selected") {
+      try {
+        await assignEmployeeRights(empCode, selectedRight, "", username);
+        toast.success("Rights assigned successfully");
+      } catch (error) {
+        toast.error(error || "Error assigning rights");
+      }
+    } else {
+      toast.error("Select a mode to assign rights");
     }
   };
 
@@ -90,7 +111,17 @@ function RightsMapping() {
     <div className="content">
       <h2>Rights Mapping- {empCode}</h2>
 
-      <div className="rights-mapping-container">
+      <h5 style={{ fontWeight: 'normal', fontStyle: 'italic', marginTop: '10px', marginBottom: '20px' }}>Assigns Rights Individually or by Group</h5>
+
+      <div className="custom-form-group" style={{display: 'flex', justifyContent: 'center'}}>
+        <div className="custom-form-group-button" style={{ marginBottom: '20px', gap: '10px', display: 'flex' }}>
+        <button onClick={() => setMode("selected")}>Assign Selected Rights</button>
+        <button onClick={() => setMode("group")}>Assign by Group</button>
+      </div>
+     </div>
+
+      {mode === "selected" && (
+       <div className="rights-mapping-container">
         <div className="available-rights-mapping-container">
           <h3>Available Rights</h3>
           <div className="available-roles-list">
@@ -130,12 +161,34 @@ function RightsMapping() {
 
         </div>
       </div>
-      
+      )}
+
+      {mode === "group" && (
+        <div className="rights-mapping-group-container">
+          <div className="custom-form-group">
+            <label>Group:</label>
+            <select className="form-control" name="group" onChange={(e) => setGroup(e.target.value)} value={group} required>
+              <option value="">Select group</option>
+              <option value="EMPLOYEE">Employee</option>
+              <option value="MANAGER">Manager</option>
+              <option value="ASSISTANTMANAGER">Assistant Manager</option>
+              <option value="HR">HR</option>
+              <option value="ADMIN">Admin</option>
+              <option value="SUPERADMIN">Super Admin</option>
+              <option value="USER">User</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       <ToastContainer position="top-right"/>
 
-      <div className="custom-form-group-button">
-        <button onClick={handleSubmit}>Assign Rights</button>
-      </div>
+      {mode && 
+        <div className="custom-form-group-button">
+          <button onClick={handleSubmit}>Assign Rights</button>
+        </div>
+      }
+      
     </div>
   );
 }
