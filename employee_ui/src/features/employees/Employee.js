@@ -170,14 +170,13 @@ function Employee({onNavigate}) {
                 labelKey="name"
                 onSearch={async (query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
                     setIsLoading(true);
                     const payload = { employeeNames: [query] };
                     const { data } = await searchEmployees(payload, token);
-                    // setEmployeeDetails(data);
+                    console.log(data);
                     setNameOptions(data.map((emp) => emp.name));
                     
                   } catch (error) {
@@ -205,13 +204,12 @@ function Employee({onNavigate}) {
                 labelKey="email"
                 onSearch={async (query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
                     const payload = { employeeEmail: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    // setEmployeeDetails(data);
+                    console.log(data);
                     setEmailOptions(data.map((emp) => emp.email));
                     
                   } catch (error) {
@@ -234,13 +232,11 @@ function Employee({onNavigate}) {
                 labelKey="phoneNumber"
                 onSearch={async (query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
                     const payload = { employeePhoneNumber: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    // setEmployeeDetails(data);
                     setPhoneOptions(data.map((emp) => emp.phoneNumber));
                     
                   } catch (error) {
@@ -263,13 +259,11 @@ function Employee({onNavigate}) {
                 labelKey="empCode"
                 onSearch={async (query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
                     const payload = { employeeCode: [query] };
                     const { data } = await searchEmployees(payload,token);
-                    // setEmployeeDetails(data);
                     setEmpCodeOptions(data.map((emp) => emp.empCode));
                     
                   } catch (error) {
@@ -292,13 +286,11 @@ function Employee({onNavigate}) {
                 labelKey="empDepartment"
                 onSearch={async (query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                   try {
                     const payload = { employeeDepartment: [query] };
                     const { data } = await searchEmployees(payload, token);
-                    // setEmployeeDetails(data);
                     setDepartmentOptions([...new Set(data.map((emp) => emp.empDepartment))]);
                   } catch (error) {
                     console.error(error);
@@ -323,14 +315,12 @@ function Employee({onNavigate}) {
                 labelKey="empStatus"
                 onSearch={ async(query) => {
                   if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
 
                   try {
                     const payload = { employeeStatus: query };
                     const { data } = await searchEmployees(payload, token);
-                    // setEmployeeDetails(data);
                     setStatusOptions([...new Set(data.map((emp) => emp.employeeStatus))]);
                   } catch (error) {
                     console.error(error);
@@ -359,7 +349,6 @@ function Employee({onNavigate}) {
               }
               onSearch={async (query) => {
                 if (!query) {
-                    // fetchEmployeeDetails();
                     return;
                   }
                 try {
@@ -367,7 +356,6 @@ function Employee({onNavigate}) {
                   
                   const payload = { searchKey: query };
                   const { data } = await searchEmployees(payload,token);
-                  // setEmployeeDetails(data);
                   setSearchKeyOptions(data);
                   
                 } catch (error) {

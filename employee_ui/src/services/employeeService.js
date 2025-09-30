@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import { useApi } from "./useApi";
 
 export const useEmployeeService = () => {
@@ -18,10 +16,10 @@ export const useEmployeeService = () => {
   };
 
   const searchEmployees = async (payload,token) => {
-    return axios.post(`/employee/search`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    };
+    const response = await api.post("/search", payload);
+    console.log(response);
+    return response;
+  };
 
   const updateEmployee = async (employeeData) => {
     const response = await api.put("/updateEmployee", employeeData);
