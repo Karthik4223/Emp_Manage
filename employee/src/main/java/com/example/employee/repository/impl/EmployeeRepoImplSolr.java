@@ -82,23 +82,11 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 	    String solrCollection = "Employees";
 	    String empCode = employee.getEmpCode();
 	    
-	    SolrDocument existingDoc;
 		
-	    try {
-			existingDoc = solrClient.getById(solrCollection, empCode);
-			deleteEmployeeFromSolr(empCode);
-		} catch (SolrServerException | IOException e) {
-			throw new EmployeeException("Failed to get employee from solr");
-		}
+	    deleteEmployeeFromSolr(empCode);
 		
 
 	    SolrInputDocument updatedDoc = new SolrInputDocument();
-
-	    if (existingDoc != null) {
-	        existingDoc.getFieldNames().forEach(field -> {
-	            updatedDoc.addField(field, existingDoc.getFieldValue(field));
-	        });
-	    }
 
 	    updatedDoc.setField("emp_code", empCode);
 	    updatedDoc.setField("emp_password", employee.getEmpPassword());
