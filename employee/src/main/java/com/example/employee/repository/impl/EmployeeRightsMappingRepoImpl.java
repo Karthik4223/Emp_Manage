@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import com.example.employee.customException.EmployeeException;
 import com.example.employee.helpers.EmployeeRightsRowMapper;
 import com.example.employee.helpers.SqlParamSourceForEmployeeRights;
 import com.example.employee.model.EmployeeRights;
@@ -26,7 +27,7 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 	@Override
 	public boolean addEmployeeRights(EmployeeRights employeeRights) {
 		
-		String sqlRightGroup = "Select right_group from Rights where right_code=:right_code";
+//		String sqlRightGroup = "Select right_group from Rights where right_code=:right_code";
 		
 		
 	    String sqlString = "INSERT INTO EmployeeRights(emp_code, right_code, createdDateTime, createdBy) " +
@@ -109,11 +110,17 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 	}
 	
 	
-
-	
 	@Override
-	public boolean deleteEmployeeRights(String empCode, List<String> rightCodes) {
-	  
+	public boolean deleteEmployeeRights(String empCode, List<String> rightCodes) throws EmployeeException {
+		
+		EmployeeRights existingEmployeeRights = getEmployeeRightsByEmpCode(empCode);
+		
+		boolean logres=	logEmployeeRights(existingEmployeeRights);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee rights before delete");
+		}	 
+		
 	    String sql = "DELETE FROM EmployeeRights WHERE emp_code = :emp_code AND right_code IN (:right_codes)";
 
 	    MapSqlParameterSource params = new MapSqlParameterSource()
@@ -126,8 +133,8 @@ public class EmployeeRightsMappingRepoImpl implements EmployeeRightsMappingRepo{
 	}
 
 
-	@Override
-	public boolean logEmployeeRights(EmployeeRights employeeRights) {
+	
+	private boolean logEmployeeRights(EmployeeRights employeeRights) {
 	    String sqlString = "INSERT INTO EmployeeRights_log " +
 	                       "SELECT emp_code, right_code, createdDateTime, createdBy, updatedBy, sysTime " +
 	                       "FROM EmployeeRights " +

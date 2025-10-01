@@ -98,7 +98,7 @@ function SearchEmployee({ onNavigate }) {
       }
 
       } catch (error) {
-        console.error("Error updating employee status:", error);
+        console.error("Error updating employee status:", error.message);
       }
     };
 

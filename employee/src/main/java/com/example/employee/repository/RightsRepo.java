@@ -2,6 +2,7 @@ package com.example.employee.repository;
 
 import java.util.List;
 
+import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
 import com.example.employee.model.Rights;
 
@@ -11,15 +12,13 @@ public interface RightsRepo {
 
 	List<Rights> getAllRights();
 
-	boolean updateRights(Rights rights);
+	boolean updateRights(Rights rights) throws EmployeeException;
 
-	boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy);
+	boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteRights(String rightCode);
+	boolean deleteRights(String rightCode) throws EmployeeException;
 
 	Rights getRightById(String right_code);
-
-	boolean logRights(Rights right);
 
 	Integer getRightId();
 	

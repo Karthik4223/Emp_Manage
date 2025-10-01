@@ -23,7 +23,18 @@ export const useApi = (baseURL) => {
 
     instance.interceptors.response.use(
       (response) => response,
-      (error) => Promise.reject(error.response?.data || error.message)
+      (error) => {
+        if (error.response) {
+          const data = error.response.data;
+          if (typeof data === 'object') {
+            return Promise.reject({ ...data, status: error.response.status });
+          } else {
+            return Promise.reject({ message: data, status: error.response.status });
+          }
+        }
+        return Promise.reject({ message: error.message, status: 0 });
+      }  
+      // (error) => Promise.reject(error.response?.data || error.message)
     );
 
     return instance;

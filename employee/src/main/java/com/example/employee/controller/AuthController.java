@@ -104,7 +104,7 @@ public class AuthController {
             responseBody.put("token", jwtToken);
             responseBody.put("rightsNames", empRightsNames);
             responseBody.put("rightsCodes", empRightsCodes);
-
+                        
             return ResponseEntity.ok(responseBody);
             
         } catch (EmployeeException e) {

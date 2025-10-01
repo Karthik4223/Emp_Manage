@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +34,8 @@ public class EmployeeRequestController {
 	
 	@Autowired
     private EmployeeExcelService employeeExcelService;
-
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_CREATE')")
 	@PostMapping("/addEmployeeRequest")
 	public ResponseEntity<String> addEmployeeRequest(@RequestBody EmployeeRequest employeeRequest){
 		boolean res;
@@ -52,13 +53,14 @@ public class EmployeeRequestController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_VIEW')")
 	@GetMapping("/getAllEmployeeRequests")
 	public ResponseEntity<List<EmployeeRequest>> getAllEmployeeRequests(){
 		return ResponseEntity.ok(employeeRequestService.getAllEmployeeRequests());
 		
 	}
 	
-	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_UPDATE')")
 	@PutMapping("/updateEmployeeRequest")
 	public ResponseEntity<String> updateEmployeeRequest(@RequestBody EmployeeRequest employeeRequest) {
 		boolean res = false;
@@ -77,8 +79,10 @@ public class EmployeeRequestController {
 		
 	}
 
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_APPROVE_REJECT')")
 	@PutMapping("/updateEmployeeRequestStatus/{ReqId}")
 	public ResponseEntity<String> updateEmployeeRequestStatus(@PathVariable Integer ReqId,@RequestParam EmployeeRequestStatus newStatus,@RequestParam String updatedBy) {
+				
 		boolean res = false;
 		try {
 			res = employeeRequestService.updateEmployeeRequestStatus(ReqId, newStatus, updatedBy);
@@ -93,7 +97,9 @@ public class EmployeeRequestController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update EmployeeRequestStatus");
 		}
 	}
-
+	
+	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_DELETE')")
 	@DeleteMapping("/deleteEmployeeRequest/{ReqId}")
 	public ResponseEntity<String>  deleteEmployeeRequest(@PathVariable Integer ReqId){
 		boolean res = false;
@@ -111,7 +117,7 @@ public class EmployeeRequestController {
 		}
 	}
 	
-	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_CREATE_EXCEL')")
     @PostMapping("/upload-excel")
     public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file,@RequestParam String createdBy) {
     	 boolean res = false;

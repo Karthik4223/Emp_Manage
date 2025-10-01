@@ -13,7 +13,7 @@ function Rights() {
   const [rights, setRights] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
-  const { username } = useContext(AuthContext);
+  const { empCode, rightsNames } = useContext(AuthContext);
 
   useEffect(() => {
     if (message) {
@@ -42,7 +42,7 @@ function Rights() {
       const data = await getAllRights();
       setRights(data);
     } catch (err) {
-      setMessage(err || "Error fetching rights");
+      setMessage(err.message || "Error fetching rights");
       setMessageType("error");
     }
   }, [getAllRights]);
@@ -54,12 +54,12 @@ function Rights() {
   const handleStatusChange = async (rightCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
-      await updateRightStatus(rightCode, newStatus, username);
+      await updateRightStatus(rightCode, newStatus, empCode);
       setMessage(`Right: ${rightCode} ${currentStatus.toLowerCase()}d successfully.`);
       setMessageType("success");
       fetchRights();
     } catch (err) {
-      setMessage(err || "Error updating right status");
+      setMessage(err.message || "Error updating right status");
       setMessageType("error");
     }
   };
@@ -96,9 +96,12 @@ function Rights() {
               <td>{right.rightUpdatedDateTime}</td>
               <td>{right.createdBy}</td>
               <td>{right.updatedBy}</td>
+            
+            {rightsNames?.includes("RIGHT_RIGHTS_CHANGE_STATUS") && (
               <td className="action-buttons">
                 <button className="action-button-status-button" onClick={() => handleStatusChange(right.rightCode, right.rightStatus)}>{right.rightStatus === 'ACTIVE' ? 'Inactivate' : 'Activate'}</button>
               </td>
+            )}
             </tr>
           ))}
         </tbody>

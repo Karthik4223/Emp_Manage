@@ -115,11 +115,11 @@ public class EmployeeRightsServiceImpl implements EmployeeRightsService {
 	            throw new EmployeeException("Right code is mandatory");
 	        }
 	                	  
-			EmployeeRights existingEmployeeRights = employeeRightsMappingRepo.getEmployeeRightsByEmpCode(emp_code);
-			boolean logres= employeeRightsMappingRepo.logEmployeeRights(existingEmployeeRights);
-			if(!logres) {
-				throw new EmployeeException("Failed to log EmployeeRequest before update");
-			}
+//			EmployeeRights existingEmployeeRights = employeeRightsMappingRepo.getEmployeeRightsByEmpCode(emp_code);
+//			boolean logres= employeeRightsMappingRepo.logEmployeeRights(existingEmployeeRights);
+//			if(!logres) {
+//				throw new EmployeeException("Failed to log EmployeeRequest before update");
+//			}
 	    
 			return employeeRightsMappingRepo.deleteEmployeeRights(emp_code,right_code);
 			

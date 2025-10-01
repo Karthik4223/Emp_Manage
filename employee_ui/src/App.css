@@ -289,6 +289,7 @@
 
 .filter-button{
   top:0;
+  display: flex ;
   background-color: #007bff;
   color: white;
   border: none;

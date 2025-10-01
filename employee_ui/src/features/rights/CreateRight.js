@@ -9,11 +9,11 @@ import { AuthContext } from "../../context/AuthContext";
 
 function CreateRight() {
     const { createRight } = useRightsService();
-    const { username } = useContext(AuthContext);
+    const { empCode } = useContext(AuthContext);
 
     const [Right, setRight] = useState({
         rightName: '',
-        createdBy: username,
+        createdBy: empCode,
         group: ''
     });
 
@@ -46,7 +46,7 @@ function CreateRight() {
             setMessageType("success");
             setRight({ rightName: "", group: "" });
         } catch (err) {
-            setMessage(err || "Error creating right.");
+            setMessage(err.message || "Error creating right.");
             setMessageType("error");
         }
     };
@@ -67,7 +67,7 @@ function CreateRight() {
 
             <div className="custom-form-group">
             <label>Group:</label>
-            <select className="form-control" name="group" onChange={handleChange} value={Right.group} required>
+            <select className="form-control" name="group" onChange={handleChange} value={Right.group} >
               <option value="">Select group</option>
               <option value="EMPLOYEE">Employee</option>
               <option value="MANAGER">Manager</option>

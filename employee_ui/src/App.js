@@ -1,5 +1,5 @@
 import React, { useState, useContext, lazy, Suspense } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate,Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 
 const Home = lazy(() => import("./pages/Home"));
@@ -45,7 +45,8 @@ function App() {
   const renderRoutes = () => (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+
+        <Route path="/login"  element={isLoggedIn ? <Navigate to="/home" /> : <LoginPage />} />
 
         <Route path="/" element={
           <PrivateRoute>

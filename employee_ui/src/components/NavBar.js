@@ -17,7 +17,7 @@ function NavBar({ onNavigate, activePage }) {
         </li>
 
 
-        {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_RIGHTS") && (
+        {rightsNames?.includes("RIGHT_RIGHTS_VIEW") && (
           <li>
             <button
               className={`custom-navbar-button ${activePage === 'rights' ? 'active' : ''}`}
@@ -39,7 +39,7 @@ function NavBar({ onNavigate, activePage }) {
           </li>
         )}
 
-        {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_RIGHTS") && (
+        {rightsNames?.includes("RIGHT_RIGHTS_CREATE") && (
           <li>
             <button
               className={`custom-navbar-button ${activePage === 'create-right' ? 'active' : ''}`}
@@ -50,7 +50,7 @@ function NavBar({ onNavigate, activePage }) {
           </li>
         )}
 
-        {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE") && (
+        {rightsNames?.includes("RIGHT_EMPLOYEE_REQUEST_CREATE") && (
           <li>
             <button
               className={`custom-navbar-button ${activePage === 'create-employee' ? 'active' : ''}`}
@@ -72,7 +72,7 @@ function NavBar({ onNavigate, activePage }) {
         </li>
         )}
 
-        {rightsNames?.includes("RIGHT_EMPLOYEE_APPROVE_REQUEST") && (
+        {rightsNames?.includes("RIGHT_EMPLOYEE_REQUEST_VIEW") && (
           <li>
             <button
               className={`custom-navbar-button ${activePage === 'employee-request' ? 'active' : ''}`}

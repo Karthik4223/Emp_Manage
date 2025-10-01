@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.EmployeeRequestStatus;
 import com.example.employee.helpers.EmployeeRequestRowMapper;
 import com.example.employee.helpers.SqlParamSourceForEmployeeRequest;
@@ -56,7 +57,17 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 	}
 	
 	@Override
-	public boolean updateEmployeeRequest(EmployeeRequest employeeRequest) {
+	public boolean updateEmployeeRequest(EmployeeRequest employeeRequest) throws EmployeeException {
+		
+		EmployeeRequest existingEmployeeRequest = getEmployeeRequestById(employeeRequest.getEmpRequestId());
+		
+		boolean logres=	logEmployeeRequest(existingEmployeeRequest);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee request before update");
+		}
+		
+		
 	    String sqlString = "UPDATE EmployeeRequests SET "
 	            + "email = :email, "
 	            + "department = :department, "
@@ -79,8 +90,18 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 
 	
 	@Override
-	public boolean updateEmployeeRequestStatus(Integer emp_RequestId, EmployeeRequestStatus newStatus, String updatedBy) {
-	    String sqlString = "UPDATE EmployeeRequests SET "
+	public boolean updateEmployeeRequestStatus(Integer emp_RequestId, EmployeeRequestStatus newStatus, String updatedBy) throws EmployeeException {
+	    
+		EmployeeRequest existingEmployeeRequest = getEmployeeRequestById(emp_RequestId);
+
+		boolean logres=	logEmployeeRequest(existingEmployeeRequest);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee request before update status");
+		}
+		
+		
+		String sqlString = "UPDATE EmployeeRequests SET "
 	            + "emp_RequestStatus = :emp_RequestStatus, "
 	            + "updatedDateTime = :updatedDateTime, "
 	            + "updatedBy = :updatedBy "
@@ -98,8 +119,17 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 	}
 	
 	@Override
-	public boolean deleteEmployeeRequest(Integer emp_RequestId) {
-	    String sqlString = "DELETE FROM EmployeeRequests WHERE emp_RequestId = :emp_RequestId";  
+	public boolean deleteEmployeeRequest(Integer emp_RequestId) throws EmployeeException {
+	    
+		EmployeeRequest existingEmployeeRequest = getEmployeeRequestById(emp_RequestId);
+
+		boolean logres=	logEmployeeRequest(existingEmployeeRequest);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee request before delete");
+		}		
+		
+		String sqlString = "DELETE FROM EmployeeRequests WHERE emp_RequestId = :emp_RequestId";  
 
 	    MapSqlParameterSource param = new MapSqlParameterSource();
 	    param.addValue("emp_RequestId", emp_RequestId); 
@@ -108,8 +138,8 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 	    return rowsEffected > 0;
 	}
 	
-	@Override
-	public boolean logEmployeeRequest(EmployeeRequest employeeRequest) {
+	
+	private boolean logEmployeeRequest(EmployeeRequest employeeRequest) {
 		String sqlEmployeReq = " Select emp_RequestId,email,department,name,phone_number,gender,country,state,city,emp_RequestStatus,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime from EmployeeRequests "
 				+ "where emp_RequestId=:emp_RequestId";
 		

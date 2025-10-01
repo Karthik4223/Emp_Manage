@@ -17,7 +17,7 @@ function Employee({onNavigate}) {
   const [editPopupOpen, setEditPopupOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { username } = useContext(AuthContext);
+  const { empCode } = useContext(AuthContext);
 
   const [filterPopupOpen, setFilterPopupOpen] = useState(false);
   const [filterData, setFilterData] = useState({
@@ -65,12 +65,12 @@ function Employee({onNavigate}) {
   const handleStatusChange = async (empCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
-      await updateEmployeeStatus(empCode, newStatus, username);
+      await updateEmployeeStatus(empCode, newStatus, empCode);
 
       toast.success(`Employee: ${empCode} ${currentStatus.toLowerCase()}d successfully.`);
       filterPopupOpen || Object.values(filterData).some((v) => v) ? fetchFilteredEmployees() : fetchEmployeeDetails();
     } catch (error) {
-      toast.error(error || "Error updating employee status.");
+      toast.error(error.message || "Error updating employee status.");
     }
   };
 
@@ -104,6 +104,7 @@ function Employee({onNavigate}) {
 
   return (
     <div className="content">
+    <div>
     <button className="filter-button" onClick={() => setFilterPopupOpen(true)} style={{ marginBottom: '10px' }}>
       Filter Employees
     </button>
@@ -472,7 +473,7 @@ function Employee({onNavigate}) {
                 </button>
               )}
 
-              {rightsNames?.includes("RIGHT_EMPLOYEE_CREATE_RIGHTS") && (
+              {rightsNames?.includes("RIGHT_EMPLOYEE_RIGHTS_MAPPING") && (
                 <button
                   className="action-button-edit-button"
                   onClick={() => handleRightsMapping(employee.empCode)}
@@ -494,6 +495,7 @@ function Employee({onNavigate}) {
         </tbody>  
       </table>
     </div>
+      </div>
     
       <ToastContainer position="top-right"/>
     </div>

@@ -10,7 +10,7 @@ import { useEmployeeRequestService } from "../../services/employeeRequestService
 function EmployeeRequest() {
   const { getAllEmployeeRequests, updateEmployeeRequestStatus } = useEmployeeRequestService();
   const { rightsNames } = useContext(AuthContext) || [];
-  const { username } = useContext(AuthContext);
+  const { empCode } = useContext(AuthContext);
   const [employeeRequests, setEmployeeRequests] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
@@ -43,6 +43,7 @@ function EmployeeRequest() {
       const { data } = await getAllEmployeeRequests();
       setEmployeeRequests(data);
       } catch (error) {
+        console.log(error);
         setMessage("Error fetching employee requests.");
         setMessageType("error");
       }
@@ -56,12 +57,12 @@ function EmployeeRequest() {
 
   const handleRequest = async (empRequestId, action) => {
     try {
-      await updateEmployeeRequestStatus(empRequestId, action, username);
+      await updateEmployeeRequestStatus(empRequestId, action, empCode);
       setMessage(`Request ${action.toLowerCase()} successfully.`);
       setMessageType("success");
       fetchEmployeeRequests();
     } catch (error) {
-      setMessage(error.response?.data || "Error updating employee request.");
+      setMessage(error.message || "Error updating employee request.");
       setMessageType("error");
     }
   };
@@ -81,6 +82,7 @@ function EmployeeRequest() {
           <option value="CREATED">Created</option>
           <option value="APPROVED">Approved</option>
           <option value="REJECTED">Rejected</option>
+          <option value="TRANSIT">In Transit</option>
         </select>
       </div>
 
@@ -128,7 +130,7 @@ function EmployeeRequest() {
               <td>{request.updatedBy && request.updatedBy.charAt(0).toUpperCase() + request.updatedBy.slice(1).toLowerCase()}</td>
               {request.empRequestStatus === "CREATED" ? (
                 <td className="action-column-cell">
-                      {rightsNames?.includes("RIGHT_EMPLOYEE_APPROVE_REQUEST") && (
+                      {rightsNames?.includes("RIGHT_EMPLOYEE_REQUEST_APPROVE_REJECT") && (
                         <>
                           <button
                             className="action-button-approve"
@@ -145,6 +147,12 @@ function EmployeeRequest() {
                         </>
                       )}
                     </td>
+              ): request.empRequestStatus === "TRANSIT" ?  (
+                <td className="action-column-cell">
+                    <button className="action-button-transit" disabled>
+                    In Transit..
+                    </button>
+                </td>
               ) : <td className="action-column-cell">{ "N/A" }</td>}
 
             </tr>

@@ -8,7 +8,9 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
 import com.example.employee.customException.EmployeeException;
+import com.example.employee.enums.EmployeeRequestStatus;
 import com.example.employee.helpers.EmployeeMapperFromEmployeeRequest;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.Employee;
 import com.example.employee.model.EmployeeRequest;
 import com.example.employee.repository.EmployeeRepo;
@@ -52,10 +54,9 @@ public class EmployeeListener {
 	}
 	
 	
-	@JmsListener(destination = "employee-queue",selector = "JMSType ='Approved'")
+	@JmsListener(destination = "employee-queue",selector = "JMSType ='ChangeEmployeeRequestStatus'")
 	public void receiveMessagefromEmployeeRequest(MapMessage message) throws EmployeeException {
 		
-//		throw new EmployeeException("");
 		Integer emp_RequestId;
 		try {
 			emp_RequestId = message.getInt("emp_RequestId");
@@ -64,18 +65,19 @@ public class EmployeeListener {
 			throw new EmployeeException("Falied to get employee RequestId from queue");
 		}
 		
-	
+		
 		EmployeeRequest employeeRequest =employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
 		Employee employee = EmployeeMapperFromEmployeeRequest.employeeMapperFromEmployeeRequest(employeeRequest);
-		
 	try {
-			employeeService.addEmployee(employee);
+		 boolean res =	employeeService.addEmployee(employee);
+		 if(res) {
+			employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.APPROVED,GetLoggedInEmployee.getLoggedInEmployeeCode());
+		 }
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 			throw new EmployeeException("Failed to add Employee");	
 		}
+	
 	}
-	
-	
 
 }

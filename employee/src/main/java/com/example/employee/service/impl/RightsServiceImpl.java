@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.Rights;
 import com.example.employee.repository.RightsRepo;
 import com.example.employee.repository.RightsRepoRedis;
@@ -66,16 +67,7 @@ public class RightsServiceImpl implements RightsService{
 		try {
 			Validate.validateRights(rights);
 			
-			Rights existingRights = rightsRepo.getRightById(rights.getRightCode());
 			
-			if(existingRights==null) {
-				throw new EmployeeException("Right not Found");
-			}
-			
-			boolean logres= rightsRepo.logRights(existingRights);
-			if(!logres) {
-				throw new EmployeeException("Failed to log right before update");
-			}
 			rights.setRightUpdatedDateTime(LocalDateTime.now());
 			rights.setUpdatedBy("ADMIN");
 			boolean res= rightsRepo.updateRights(rights);
@@ -108,16 +100,10 @@ public class RightsServiceImpl implements RightsService{
 	            throw new EmployeeException("Invalid Right status");
 	    	}
 			
-	    	Rights existingRights = rightsRepo.getRightById(rightCode);
-	    	
-	    	if(existingRights==null) {
-	    		throw new EmployeeException("Right not Found");
-	    	}
-	    	
-	    	boolean logres= rightsRepo.logRights(existingRights);
-	    	if(!logres) {
-	    		throw new EmployeeException("Failed to log right before updatestatus");
-	    	}
+	    	log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),updatedBy);
+			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(updatedBy)) {
+				throw new EmployeeException("The loggedIn user miss-match");
+			}
 	    	
 			boolean res= rightsRepo.updateRightsStatus(rightCode, newStatus, updatedBy);
 			if(res) {
@@ -145,16 +131,6 @@ public class RightsServiceImpl implements RightsService{
 	            throw new EmployeeException("Right code must be alphanumeric");
 	        }   
 	    
-	    	Rights existingRights = rightsRepo.getRightById(rightCode);
-	    	
-	    	if(existingRights==null) {
-	    		throw new EmployeeException("Right not Found");
-	    	}
-	    	
-	    	boolean logres= rightsRepo.logRights(existingRights);
-	    	if(!logres) {
-	    		throw new EmployeeException("Failed to log right before delete");
-	    	}
 	    	
 			boolean res= rightsRepo.deleteRights(rightCode);
 			if(res) {

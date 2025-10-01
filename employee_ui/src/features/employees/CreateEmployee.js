@@ -9,7 +9,7 @@ import AuthContext from "../../context/AuthContext";
 function CreateEmployee({ prefillData, onClose }) {
   const { updateEmployee } = useEmployeeService();
   const { createEmployee } = useEmployeeRequestService();
-  const { username }= useContext(AuthContext);
+  const { empCode }= useContext(AuthContext);
 
   const [employeeRequestData, setEmployeeRequestData] = useState({
     empCode: '',
@@ -22,7 +22,7 @@ function CreateEmployee({ prefillData, onClose }) {
     country: '',
     state: '',
     city: '',
-    createdBy: username,
+    createdBy: empCode,
     updatedBy: ''
   });
 
@@ -57,9 +57,9 @@ function CreateEmployee({ prefillData, onClose }) {
       state: prefillData.state || '',
       city: prefillData.city || '',
       createdBy: prefillData.createdBy || '',
-      updatedBy: username
+      updatedBy: empCode
     });
-  }, [prefillData, username]);
+  }, [prefillData, empCode]);
 
     useEffect(() => {
       if (employeeRequestData.country) {
@@ -167,10 +167,17 @@ function CreateEmployee({ prefillData, onClose }) {
         country: '',
         state: '',
         city: '',
+        createdBy: empCode,
+        updatedBy: ''
       });
     } catch (err) {
-      setMessage(err || "Error submitting form.");
-      setMessageType("error");
+      if (err.status === 403) {
+          setMessage("You are not authorized to create an employee.");
+          setMessageType("error");
+      } else {
+          setMessage(err.message || "Error submitting form.");
+          setMessageType("error");
+      }
     }
   };
 

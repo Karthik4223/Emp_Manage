@@ -1,5 +1,7 @@
 package com.example.employee.model;
 
+import java.time.LocalDateTime;
+
 import com.example.employee.enums.Gender;
 
 import lombok.Data;
@@ -13,5 +15,12 @@ public class Person {
 	private String country;
 	private String state;
 	private String city;
+	
+	private String empPassword;
+	private String empDepartment;
+	private LocalDateTime empCreatedDateTime;
+	private LocalDateTime empUpdatedDateTime;	
+	private String createdBy;
+	private String updatedBy;
 	
 }

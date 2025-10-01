@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.employee.helpers.JwtUtil;
+import com.example.employee.model.EmployeeLogin;
 
 import io.jsonwebtoken.Claims;
 
@@ -48,13 +49,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (empCode != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(token, empCode)) {
                 Claims claims = jwtUtil.getClaims(token);
-                List<GrantedAuthority> authorities = ((List<String>) claims.get("authorities")).stream()
+                List<String> rights = (List<String>) claims.get("authorities");
+                List<GrantedAuthority> authorities = rights.stream()
                 	    .map(r -> new SimpleGrantedAuthority(r))
                         .collect(Collectors.toList());
+                
+
+                EmployeeLogin userDetails = new EmployeeLogin(empCode, null, rights);
 
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(empCode, null, authorities);
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+
+//                UsernamePasswordAuthenticationToken authToken =
+//                        new UsernamePasswordAuthenticationToken(empCode, null, authorities);
+//                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 

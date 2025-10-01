@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ public class EmployeeController {
 	@Autowired
 	private EmployeeService employeeService;
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_CREATE')")
 	@PostMapping("/addEmployee")
 	public ResponseEntity<String> addEmployee(@RequestBody Employee employee){
 		boolean res = false;
@@ -47,6 +49,7 @@ public class EmployeeController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_VIEW')")
 	@GetMapping("/getAllEmployees")
 	public ResponseEntity<List<Employee>> getAllEmployees(){
 		try {
@@ -57,6 +60,7 @@ public class EmployeeController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_EDIT')")
 	@PutMapping("/updateEmployee")
 	public ResponseEntity<String> updateEmployee(@RequestBody Employee employee) {
 		boolean res = false;
@@ -75,6 +79,7 @@ public class EmployeeController {
 		
 	}
 
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_CHANGE_STATUS')")
 	@PutMapping("/updateEmpStatus/{empCode}")
 	public ResponseEntity<String> updateEmployeeStatus(@PathVariable String empCode,@RequestParam Status newStatus,@RequestParam String updatedBy) {
 		boolean res = false;
@@ -92,6 +97,7 @@ public class EmployeeController {
 		}
 	}
 
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_DELETE')")
 	@DeleteMapping("/deleteEmployee/{empCode}")
 	public ResponseEntity<String>  deleteEmployee(@PathVariable String empCode){
 		boolean res = false;

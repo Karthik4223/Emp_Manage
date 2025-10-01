@@ -12,7 +12,7 @@ function RightsMapping() {
   const { getAllRights } = useRightsService();
   const { getEmployeeRights, assignEmployeeRights } = useEmployeeRightsService();
   const { empCode } = useParams();
-  const { username } = useContext(AuthContext);
+  const { empCode: contextEmpCode } = useContext(AuthContext);
 
   const [allRights, setAllRights] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
@@ -24,9 +24,7 @@ function RightsMapping() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
 
-  // const [assignSelectedRights, setAssignSelectedRights] = useState(false);
-  // const [assignGroupRights, setAssignGroupRights] = useState(false);
-
+  
   useEffect(() => {
     if (message) {
       toast(message, { type: messageType === 'error' ? 'error' : 'success' });
@@ -49,7 +47,7 @@ function RightsMapping() {
         const empRights = await getEmployeeRights(empCode);
         setSelectedRight(empRights.rightCode || []);
       } catch (error) {
-        setMessage(typeof error === 'string' ? error : "Error fetching rights");
+        setMessage(error.message || "Error fetching rights");
         setMessageType('error');
       }
     };
@@ -88,18 +86,19 @@ function RightsMapping() {
       if (!group) return toast.error("Please select a group");
 
       try {
-        await assignEmployeeRights(empCode, [], group, username);
+        await assignEmployeeRights(empCode, [], group, contextEmpCode);
         fetchRightsData();
         toast.success("Group rights assigned successfully");
       } catch (error) {
-        toast.error(error || "Error assigning group rights");
+        toast.error(error.message || "Error assigning group rights");
       }
     } else if (mode === "selected") {
       try {
-        await assignEmployeeRights(empCode, selectedRight, "", username);
+        await assignEmployeeRights(empCode, selectedRight, "", contextEmpCode);
         toast.success("Rights assigned successfully");
       } catch (error) {
-        toast.error(error || "Error assigning rights");
+        console.error("Error assigning rights:", error);
+        toast.error(error.message || "Error assigning rights");
       }
     } else {
       toast.error("Select a mode to assign rights");

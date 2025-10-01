@@ -6,7 +6,7 @@ import React, { useState,useContext } from "react";
 import { useEmployeeRequestService } from "../../services/employeeRequestService";
 
 function CreateEmployeeExcel() {
-  const { username } = useContext(AuthContext);
+  const { empCode } = useContext(AuthContext);
   const [file, setFile] = useState(null);
   const { uploadEmployeeExcel } = useEmployeeRequestService();
 
@@ -22,11 +22,11 @@ function CreateEmployeeExcel() {
     formData.append("file", file);
 
     try {
-      await uploadEmployeeExcel(formData, username);
+      await uploadEmployeeExcel(formData, empCode);
       toast.success("File uploaded successfully!");
       setFile(null);
     } catch (err) {
-      toast.error(err || "Failed to upload file.");
+      toast.error(err.message || "Failed to upload file.");
     }
   };
 

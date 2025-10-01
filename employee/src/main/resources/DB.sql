@@ -30,7 +30,7 @@ CREATE TABLE Rights (
     right_code VARCHAR(10) UNIQUE NOT NULL , 
     right_name VARCHAR(100) UNIQUE NOT NULL,
 	right_status CHAR(1) NOT NULL, 
-    right_group VARCHAR(100) NOT NULL,
+    right_group VARCHAR(100) ,
     createdDateTime DATETIME NOT NULL, 
     updatedDateTime DATETIME ,
     createdBy VARCHAR(20) NOT NULL,
@@ -82,7 +82,6 @@ CREATE TABLE Employees (
 CREATE TABLE EmployeeRights (
     emp_code VARCHAR(10),
     right_code VARCHAR(10),
-	right_group VARCHAR(100) NOT NULL,
     PRIMARY KEY(emp_code, right_code),
     FOREIGN KEY(emp_code) REFERENCES Employees(emp_code),
     FOREIGN KEY(right_code) REFERENCES Rights(right_code),
@@ -103,6 +102,11 @@ select * from EmployeeRights;
 -- Drop table Employees_log;
 -- Drop table EmployeeRequests_log;
  -- Drop table EmployeeRights_log;
+
+select * from EmployeeRights;
+
+insert into Rights_log Select right_id,right_code,right_name,right_status,right_group,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime from Rights 
+where right_code="RIG0030";
 
 -- logs 
 CREATE TABLE Rights_log (
@@ -167,5 +171,10 @@ CREATE TABLE Employees_log (
 	sysTime DATETIME NOT NULL
 
 );
+
+
+select * from Employees;
+
+select * from Rights_log;
 
 

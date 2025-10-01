@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
 import com.example.employee.helpers.EmployeeRowMapper;
 import com.example.employee.helpers.SqlParamSoucreForEmployee;
@@ -59,7 +60,16 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	
 	
 	@Override
-	public boolean updateEmployee(Employee employee) {
+	public boolean updateEmployee(Employee employee) throws EmployeeException{
+		
+		Employee existingEmployee = getAllEmployeeById(employee.getEmpCode());
+		
+		boolean logres= logEmployee(existingEmployee);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee before update");
+		}
+		
 	    String sqlString = "UPDATE Employees SET "
 	            + "email = :email, "
 	            + "department = :department, "
@@ -82,7 +92,15 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	}
 	
 	@Override
-	public boolean updateEmployeeStatus(String empCode, Status newStatus, String updatedBy) {
+	public boolean updateEmployeeStatus(String empCode, Status newStatus, String updatedBy) throws EmployeeException {
+		Employee existingEmployee = getAllEmployeeById(empCode);
+		
+		boolean logres= logEmployee(existingEmployee);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee before update status");
+		}
+		
 	    String sqlString = "UPDATE Employees SET "
 	            + "emp_status = :emp_status, "
 	            + "updatedDateTime = :updatedDateTime, "
@@ -103,7 +121,16 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 
 
 	@Override
-	public boolean deleteEmployee(String empCode) {
+	public boolean deleteEmployee(String empCode) throws EmployeeException {
+		
+		Employee existingEmployee = getAllEmployeeById(empCode);
+		
+		boolean logres= logEmployee(existingEmployee);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log employee before delete");
+		}
+		
 	    String sqlString = "DELETE FROM Employees WHERE emp_code = :emp_code";  
 
 	    MapSqlParameterSource param = new MapSqlParameterSource();
@@ -114,8 +141,8 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	    return rowsEffected > 0;
 	}
 	
-	@Override
-	public boolean logEmployee(Employee employee) {
+	
+	private boolean logEmployee(Employee employee) {
 		String sqlEmployee=" Select emp_id,emp_code,emp_password,email,department,name,phone_number,gender,country,state,city,emp_status,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime from Employees "
 				+ "where emp_code=:emp_code";
 

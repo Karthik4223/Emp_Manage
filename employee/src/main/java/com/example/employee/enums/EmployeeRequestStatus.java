@@ -1,7 +1,7 @@
 package com.example.employee.enums;
 
 public enum EmployeeRequestStatus {
-	CREATED("C"),APPROVED("A"),REJECTED("R");
+	CREATED("C"),APPROVED("A"),REJECTED("R"),TRANSIT("T");
 	
 	private String code;
 	

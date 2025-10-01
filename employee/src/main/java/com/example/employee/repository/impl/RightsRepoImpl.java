@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
 import com.example.employee.helpers.RightsRowMapper;
 import com.example.employee.helpers.SqlParamSoucreForRights;
@@ -55,7 +56,16 @@ public class RightsRepoImpl implements RightsRepo{
 	}
 	
 	@Override
-	public boolean updateRights(Rights rights) {
+	public boolean updateRights(Rights rights) throws EmployeeException {
+		
+		Rights existingRights = getRightById(rights.getRightCode());
+		
+		boolean logres=	logRights(existingRights);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log right before update");
+		}		
+		
 	    String sqlString = "UPDATE Rights SET "
 	            + "right_name = :right_name, "
 	            + "right_status = :right_status, "
@@ -71,7 +81,15 @@ public class RightsRepoImpl implements RightsRepo{
 	}
 	
 	@Override
-	public boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy) {
+	public boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy) throws EmployeeException {
+		
+		Rights existingRights = getRightById(rightCode);
+		
+		boolean logres=	logRights(existingRights);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log right before update status");
+		}		
 	    String sqlString = "UPDATE Rights SET "
 	            + "right_status = :right_status, "
 	            + "updatedDateTime = :updatedDateTime, "
@@ -90,7 +108,16 @@ public class RightsRepoImpl implements RightsRepo{
 	}
 	
 	@Override
-	public boolean deleteRights(String rightCode) {
+	public boolean deleteRights(String rightCode) throws EmployeeException {
+		Rights existingRights = getRightById(rightCode);
+		
+		
+		boolean logres=	logRights(existingRights);
+
+		if(!logres) {
+			throw new EmployeeException("Failed to log right before delete");
+		}
+		
 	    String sqlString = "DELETE FROM Rights WHERE right_code = :right_code";  
 	    
 	    MapSqlParameterSource param = new MapSqlParameterSource();
@@ -100,8 +127,8 @@ public class RightsRepoImpl implements RightsRepo{
 	    return rowsEffected > 0;
 	}
 	
-	@Override
-	public boolean logRights(Rights right) {
+
+	private boolean logRights(Rights right) {
 		String sqlRight = " Select right_id,right_code,right_name,right_status,createdDateTime,updatedDateTime,createdBy,updatedBy,sysTime,right_group from Rights "
 				+ "where right_code=:right_code";
 		

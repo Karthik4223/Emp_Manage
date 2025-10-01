@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class EmployeeRightsController {
 	@Autowired
 	private EmployeeRightsService employeeRightsService;
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@PostMapping("/addEmployeeRights")
 	public ResponseEntity<String> addEmployeeRights(@RequestBody EmployeeRights employeeRights, @RequestParam String group, @RequestParam String createdBy){
 		boolean res;
@@ -45,11 +47,13 @@ public class EmployeeRightsController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@GetMapping("/getAllEmployeeRights")
 	public ResponseEntity<List<EmployeeRights>> getAllEmployeeRights(){
 		return ResponseEntity.ok(employeeRightsService.getAllEmployeeRights());
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@DeleteMapping("/deleteEmployeeRights/{empCode}")
 	public ResponseEntity<String>  deleteEmployeeRights(@PathVariable String empCode, @RequestBody List<String> rightCode){
 		boolean res = false;
@@ -67,6 +71,7 @@ public class EmployeeRightsController {
 		}
 	}
 	
+	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@GetMapping("/getEmployeeRights/{emp_code}")
 	public ResponseEntity<?> getEmployeeRightsByEmpCode(@PathVariable String emp_code) {
 		

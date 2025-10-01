@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.EmployeeRequestStatus;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.helpers.MessageCauseForException;
 import com.example.employee.model.EmployeeRequest;
 import com.example.employee.repository.EmployeeRequestRepo;
@@ -41,19 +42,15 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			Validate.validateEmployeeRequest(employeeRequest);
 			employeeRequest.setEmpRequestStatus(EmployeeRequestStatus.CREATED);
 			employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
-//			employeeRequest.setCreatedBy("ADMIN");
+			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),employeeRequest.getCreatedBy());
+			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(employeeRequest.getCreatedBy())) {
+				throw new EmployeeException("The loggedIn user miss-match");
+			}
 			return employeeRequestRepo.addEmployeeRequest(employeeRequest);
 		}catch (DataIntegrityViolationException e) {
 			log.error(e.getMessage(),e);
-	        Throwable rootCause = e.getRootCause();
-	        String message = rootCause != null ? rootCause.getMessage() : e.getMessage();
-	        String column = "unknown column";
-	        if (message != null) {
-	            int idx = message.indexOf("for key");
-	            if (idx != -1) {
-	                column = message.substring(idx + 8).replaceAll("['`]", "").trim();
-	            }
-	        }
+	        String column = MessageCauseForException.getMessageCause(e);
+
 	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
 		}catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
@@ -75,17 +72,7 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 	public boolean updateEmployeeRequest(EmployeeRequest employeeRequest) throws EmployeeException {
 		try {
 			Validate.validateEmployeeRequest(employeeRequest);
-			
-			EmployeeRequest existingEmployeeRequest = employeeRequestRepo.getEmployeeRequestById(employeeRequest.getEmpRequestId());
-			
-			if(existingEmployeeRequest==null) {
-				throw new EmployeeException("EmployeeRequest not Found");
-			}
-			
-			boolean logres= employeeRequestRepo.logEmployeeRequest(existingEmployeeRequest);
-			if(!logres) {
-				throw new EmployeeException("Failed to log EmployeeRequest before update");
-			}
+			employeeRequest.setCreatedBy(GetLoggedInEmployee.getLoggedInEmployeeCode());
 			
 			employeeRequest.setEmpUpdatedDateTime(LocalDateTime.now());
 			employeeRequest.setUpdatedBy("ADMIN");
@@ -111,33 +98,37 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			if (emp_RequestId <0) {
 	            throw new EmployeeException("EmployeeRequest id cannot be negative");
 	        }  
+			
+			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),updatedBy);
+			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(updatedBy)) {
+				throw new EmployeeException("The loggedIn user miss-match");
+			}
 	    	
-//	    	if(!EmployeeRequestStatus.isValidStatus(newStatus.name())) {
-//	            throw new EmployeeException("Invalid EmployeeRequest status");
-//	    	}
 			
-			EmployeeRequest existingEmployeeRequest = employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
 			
-			if(existingEmployeeRequest==null) {
-				throw new EmployeeException("EmployeeRequest not Found");
+			log.info(GetLoggedInEmployee.getLoggedInEmployeeCode());
+			
+			EmployeeRequest employeeRequest = employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
+			
+			if(employeeRequest.getEmpRequestStatus() == EmployeeRequestStatus.TRANSIT || employeeRequest.getEmpRequestStatus() == EmployeeRequestStatus.APPROVED) {
+				throw new EmployeeException("The Employee request is already been approved by some other user");
 			}
 			
-			boolean logres= employeeRequestRepo.logEmployeeRequest(existingEmployeeRequest);
-			if(!logres) {
-				throw new EmployeeException("Failed to log EmployeeRequest before update");
+			if(newStatus == EmployeeRequestStatus.REJECTED) {
+				return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.REJECTED,updatedBy);
 			}
 			
-			if(newStatus==EmployeeRequestStatus.APPROVED) {
+//			if(newStatus==EmployeeRequestStatus.APPROVED) {
 				jmsTemplate.send(QUEUE_STRING, session -> {
 					MapMessage message = session.createMapMessage();
 					message.setInt("emp_RequestId",emp_RequestId);
-					message.setJMSType("Approved");
+					message.setString("newStatus", newStatus.name());
+					message.setJMSType("ChangeEmployeeRequestStatus");
 					return message;
 					});
-			}
+//			}
 			
-			return employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, newStatus, updatedBy);
-			
+			return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.TRANSIT,updatedBy);
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
@@ -158,18 +149,7 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			if (emp_RequestId <0) {
 	            throw new EmployeeException("Employee id cannot be negative");
 	        }  
-	                	  
-			EmployeeRequest existingEmployeeRequest = employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
-			
-			if(existingEmployeeRequest==null) {
-				throw new EmployeeException("EmployeeRequest not Found");
-			}
-			
-			boolean logres= employeeRequestRepo.logEmployeeRequest(existingEmployeeRequest);
-			if(!logres) {
-				throw new EmployeeException("Failed to log EmployeeRequest before update");
-			}
-	    
+	                	  	    
 			return employeeRequestRepo.deleteEmployeeRequest(emp_RequestId);
 			
 		} catch (EmployeeException e) {
