@@ -39,6 +39,12 @@ public class RightsServiceImpl implements RightsService{
 			rights.setRightCreatedDateTime(LocalDateTime.now());
 			Validate.validateRights(rights);
 			
+			Rights rightByName = rightsRepo.getRightByName(rights.getRightName());
+			
+			if(rightByName!=null && rightByName.getRightName().equals(rights.getRightName())) {
+				throw new EmployeeException("Right Already exists");
+			}
+			
 			boolean res= rightsRepo.addRights(rights);
 			if(res) {
 				return rightsRepoRedis.addRights(rightsRepo.getRightById(rights.getRightCode()));

@@ -22,5 +22,7 @@ public interface EmployeeRequestRepo {
 
 	boolean addEmployeeRequests(List<EmployeeRequest> employees);
 
+	List<EmployeeRequest> getEmployeeRequestByPhonenumberAndEmail(String phoneNumber,String email);
+
 	
 }

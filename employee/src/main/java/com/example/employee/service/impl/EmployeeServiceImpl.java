@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
 import com.example.employee.helpers.GetLoggedInEmployee;
-import com.example.employee.helpers.MessageCauseForException;
 import com.example.employee.model.Employee;
 import com.example.employee.model.SearchCriteria;
 import com.example.employee.repository.EmployeeRepo;
@@ -61,10 +59,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 			}
 			 
 			return res;
-		}catch (DataIntegrityViolationException e) {
-			log.error(e.getMessage(),e);
-	        String column = MessageCauseForException.getMessageCause(e);
-	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
@@ -86,12 +80,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 	public boolean updateEmployee(Employee employee) throws EmployeeException {
 		try {
 			Validate.validateEmployee(employee);
-			
-//			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),employee.getCreatedBy());
-//			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(employee.getCreatedBy())) {
-//				throw new EmployeeException("The loggedIn user miss-match");
-//			}
-			
 			
 			employee.setEmpUpdatedDateTime(LocalDateTime.now());
 			boolean res= employeeRepo.updateEmployee(employee);

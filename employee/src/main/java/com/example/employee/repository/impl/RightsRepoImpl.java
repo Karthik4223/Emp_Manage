@@ -151,6 +151,20 @@ public class RightsRepoImpl implements RightsRepo{
 		
 		return res!=null ? res : null;
 	}
+
+	@Override
+	public Rights getRightByName(String rightName) {
+		String sqlString = "Select right_code,right_name,right_status,right_group,createdDateTime,updatedDateTime,createdBy,updatedBy from Rights "
+				+ "where right_name=:right_name";
+		
+		 MapSqlParameterSource param = new MapSqlParameterSource();
+
+		 param.addValue("right_name", rightName);
+		
+		 List<Rights> rights = namedParameterJdbcTemplate.query(sqlString, param,new RightsRowMapper());
+	
+		 return rights!=null ? rights.get(0) : null;
+	}
 	
 
 }

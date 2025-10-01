@@ -43,9 +43,7 @@ public class Validate {
             throw new EmployeeException("Invalid email format");
         }
         
-//        if(!Status.isValidStatus(employee.getEmployeeStatus().name())) {
-//            throw new EmployeeException("Invalid Employee status");
-//    	}
+
         
         if (employee.getEmpDepartment() == null || employee.getEmpDepartment().isEmpty()) {
             throw new EmployeeException("Department is mandatory");
@@ -53,6 +51,10 @@ public class Validate {
         
         if (employee.getName() == null || employee.getName().isEmpty()) {
             throw new EmployeeException("Name is mandatory");
+        }
+        
+        if (employee.getName().length()<4) {
+            throw new EmployeeException("Name must be atleast 4 characters");
         }
         
         if (!isAlphaWithSpaces(employee.getName())) {
@@ -110,6 +112,10 @@ public class Validate {
 
         if (employeeRequest.getName() == null || employeeRequest.getName().isEmpty()) {
             throw new EmployeeException("Name is mandatory");
+        }
+        
+        if (employeeRequest.getName().length()<4) {
+            throw new EmployeeException("Name must be atleast 4 characters");
         }
         
         if (!isAlphaWithSpaces(employeeRequest.getName())) {

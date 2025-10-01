@@ -42,16 +42,27 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			Validate.validateEmployeeRequest(employeeRequest);
 			employeeRequest.setEmpRequestStatus(EmployeeRequestStatus.CREATED);
 			employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
+			
 			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),employeeRequest.getCreatedBy());
 			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(employeeRequest.getCreatedBy())) {
 				throw new EmployeeException("The loggedIn user miss-match");
 			}
-			return employeeRequestRepo.addEmployeeRequest(employeeRequest);
-		}catch (DataIntegrityViolationException e) {
-			log.error(e.getMessage(),e);
-	        String column = MessageCauseForException.getMessageCause(e);
+			
+			
+			List<EmployeeRequest> employeeReqByPhoneNumberAndEmail = employeeRequestRepo.getEmployeeRequestByPhonenumberAndEmail(employeeRequest.getPhoneNumber(),employeeRequest.getEmail());
 
-	        throw new EmployeeException("Duplicate entry found in column: " + column, e);
+			
+			for(EmployeeRequest eReq: employeeReqByPhoneNumberAndEmail) {
+				if(eReq!=null && eReq.getEmail().equalsIgnoreCase(employeeRequest.getEmail())){
+					throw new EmployeeException("Employee request with same email already found");
+				}
+				
+				if(eReq!=null && eReq.getPhoneNumber().equals(employeeRequest.getPhoneNumber())){
+					throw new EmployeeException("Employee request with same phone number already found");
+				}				
+			}
+			
+			return employeeRequestRepo.addEmployeeRequest(employeeRequest);
 		}catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
@@ -110,11 +121,11 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			
 			EmployeeRequest employeeRequest = employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
 			
-			if(employeeRequest.getEmpRequestStatus() == EmployeeRequestStatus.TRANSIT || employeeRequest.getEmpRequestStatus() == EmployeeRequestStatus.APPROVED) {
+			if(EmployeeRequestStatus.TRANSIT.equals(employeeRequest.getEmpRequestStatus()) || EmployeeRequestStatus.APPROVED.equals(employeeRequest.getEmpRequestStatus())) {
 				throw new EmployeeException("The Employee request is already been approved by some other user");
 			}
 			
-			if(newStatus == EmployeeRequestStatus.REJECTED) {
+			if(EmployeeRequestStatus.REJECTED.equals(newStatus)) {
 				return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.REJECTED,updatedBy);
 			}
 			

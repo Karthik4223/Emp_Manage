@@ -170,6 +170,23 @@ public class EmployeeRequestRepoImpl implements EmployeeRequestRepo{
 	    return Arrays.stream(updateCounts).anyMatch(count -> count > 0);
 	}
 
+	@Override
+	public List<EmployeeRequest> getEmployeeRequestByPhonenumberAndEmail(String phoneNumber,String email) {
+		String sqlString = "Select emp_RequestId,email,department,name,phone_number,gender,country,state,city,emp_RequestStatus,createdDateTime,updatedDateTime,createdBy,updatedBy from EmployeeRequests "
+				+ "where email=:email or phone_number=:phone_number and emp_RequestStatus IN('C','A')";
+		
+		MapSqlParameterSource param = new MapSqlParameterSource();
+	    
+	    param.addValue("email", email);  
+
+	    param.addValue("phone_number", phoneNumber);  
+		
+		List<EmployeeRequest> employeeRequests = namedParameterJdbcTemplate.query(sqlString,param, new EmployeeRequestRowMapper());
+	
+	    return employeeRequests;
+	}
+	
+
 
 
 }

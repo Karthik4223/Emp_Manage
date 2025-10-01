@@ -21,5 +21,7 @@ public interface RightsRepo {
 	Rights getRightById(String right_code);
 
 	Integer getRightId();
+
+	Rights getRightByName(String rightName);
 	
 }

@@ -62,10 +62,10 @@ CREATE TABLE Employees (
     emp_id INT PRIMARY KEY AUTO_INCREMENT,
 	emp_code VARCHAR(10) UNIQUE NOT NULL, 
     emp_password VARCHAR(255) NOT NULL, 
-    email VARCHAR(200) UNIQUE NOT NULL,
+    email VARCHAR(200) NOT NULL,
 	department VARCHAR(20) NOT NULL, 
     name VARCHAR(20) NOT NULL,
-	phone_number VARCHAR(10) UNIQUE NOT NULL,
+	phone_number VARCHAR(10) NOT NULL,
 	gender CHAR(1) NOT NULL,
     country VARCHAR(3), 
     state VARCHAR(3),
@@ -175,6 +175,7 @@ CREATE TABLE Employees_log (
 
 select * from Employees;
 
-select * from Rights_log;
+select * from EmployeeRights;
 
+insert into EmployeeRights (emp_code,right_code,createdDateTime,createdBy) values('EMP0023','RIG0036',now(),'Admin');
 
