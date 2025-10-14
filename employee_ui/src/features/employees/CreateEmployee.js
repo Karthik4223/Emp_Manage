@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEmployeeService } from "../../services/employeeService";
 import { useEmployeeRequestService } from "../../services/employeeRequestService";
-import AuthContext from "../../context/AuthContext";
+import { useSelector } from "react-redux";
 
 
 function CreateEmployee({ prefillData, onClose }) {
   const { updateEmployee } = useEmployeeService();
   const { createEmployee } = useEmployeeRequestService();
-  const { empCode }= useContext(AuthContext);
+  const empCode = useSelector((state) => state.auth.empCode);
 
   const [employeeRequestData, setEmployeeRequestData] = useState({
     empCode: '',
@@ -174,6 +174,13 @@ function CreateEmployee({ prefillData, onClose }) {
       if (err.status === 403) {
           setMessage("You are not authorized to create an employee.");
           setMessageType("error");
+      }else if(err.message === "Session invalid or expired" || err.message === "No session found"){
+          toast.error("Session expired. Logging out...",{
+              // onClose: () => logout(),
+              autoClose: 1500,
+          });
+
+          return;
       } else {
           setMessage(err.message || "Error submitting form.");
           setMessageType("error");

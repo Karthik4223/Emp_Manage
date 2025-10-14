@@ -1,12 +1,11 @@
-
-import { AuthContext } from "../../context/AuthContext";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import React, { useState,useContext } from "react";
+import React, { useState } from "react";
 import { useEmployeeRequestService } from "../../services/employeeRequestService";
+import { useSelector } from 'react-redux';
 
 function CreateEmployeeExcel() {
-  const { empCode } = useContext(AuthContext);
+  const { logout } = useSelector((state) => state.auth);
   const [file, setFile] = useState(null);
   const { uploadEmployeeExcel } = useEmployeeRequestService();
 
@@ -22,10 +21,18 @@ function CreateEmployeeExcel() {
     formData.append("file", file);
 
     try {
-      await uploadEmployeeExcel(formData, empCode);
+      await uploadEmployeeExcel(formData);
       toast.success("File uploaded successfully!");
       setFile(null);
     } catch (err) {
+      if(err.message === "Session invalid or expired" || err.message === "No session found"){
+          toast.error("Session expired. Logging out...",{
+          onClose: () => logout(),
+          autoClose: 1500,
+        });
+
+        return;
+      }
       toast.error(err.message || "Failed to upload file.");
     }
   };

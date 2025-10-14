@@ -1,77 +1,70 @@
-import React, { createContext, useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { createContext, useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useSessionService } from "../services/sessionService";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-  const [username, setUsername] = useState("");
   const [empCode, setEmpCode] = useState("");
-  const [rights, setRights] = useState(() => {
-    const stored = localStorage.getItem("rights");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [empName, setEmpName] = useState("");
+  const [rightsNames, setRightsNames] = useState([]);
+  const { getSessionInfo } = useSessionService();
 
-  const[rightsNames,setRightsNames] = useState(() => {
-    const stored = localStorage.getItem("rightsNames");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const login = ({ empCode, empName, rightsNames }) => {
+    setEmpCode(empCode);
+    setEmpName(empName);
+    setRightsNames(rightsNames);
+   
+  };
+
+  const logout = async () => {
+  try{
+
+    const res = await axios.post("/auth/logout", {}, { withCredentials: true });
+    if (res.status === 200) {
+      setEmpCode("");
+      setEmpName("");
+      setRightsNames([]);
+      sessionStorage.removeItem("userSession");
+      toast.success(res.data);
+    }
+  }catch(error){
+    toast.error(error.message);
+  }
+};
+
 
   useEffect(() => {
-  if (token) {
+  
+  const fetchSessionInfo = async () => {
     try {
-      const decoded = jwtDecode(token);
-      setUsername(decoded.empName);
-      setEmpCode(decoded.sub);
-      if (rights.length === 0) {
-        setRights(rights || []);
-      }
-      if (rightsNames.length === 0) {
-        setRightsNames(rightsNames || []);
-      }
+      const response = await getSessionInfo();
+
+      const { empCode, empName, rightsNames } = response;
+
+      setEmpCode(empCode);
+      setEmpName(empName);
+      setRightsNames(rightsNames);
+
+      login({ empCode, empName, rightsNames });
     } catch (err) {
-      setToken(null);
-      setUsername("");
-      setEmpCode("");
-      setRights([]);
-      setRightsNames([]);
-      localStorage.removeItem("token");
-      localStorage.removeItem("rights");
-      localStorage.removeItem("rightsNames");
+      console.error("No active session or failed to fetch:", err);
     }
-  }
-}, [token, rights, rightsNames]);
-
-  const login = (token, rightsFromBackend = [], rightsNamesFromBackend = []) => {
-    setToken(token);
-    localStorage.setItem("token", token);
-    setRights(rightsFromBackend);
-    localStorage.setItem("rights", JSON.stringify(rightsFromBackend));
-    setRightsNames(rightsNamesFromBackend);
-    localStorage.setItem("rightsNames", JSON.stringify(rightsNamesFromBackend));
-    const decoded = jwtDecode(token);
-    setUsername(decoded.empName);
-    setEmpCode(decoded.sub);
   };
 
-  const logout = () => {
-    setToken(null);
-    setUsername("");
-    setEmpCode("");
-    setRights([]);
-    setRightsNames([]);
-    localStorage.removeItem("token");
-    localStorage.removeItem("rights");
-    localStorage.removeItem("rightsNames");
-  };
+  fetchSessionInfo();
+}, []);
 
-  const isLoggedIn = !!token;
+
+  const isLoggedIn = !!empCode;
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, token, username, empCode, rights, rightsNames, login, logout }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, empCode, empName, rightsNames, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
 export default AuthContext;

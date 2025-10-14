@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.Employee;
 import com.example.employee.model.SearchCriteria;
 import com.example.employee.service.EmployeeService;
@@ -65,6 +65,7 @@ public class EmployeeController {
 	public ResponseEntity<String> updateEmployee(@RequestBody Employee employee) {
 		boolean res = false;
 		try {
+			employee.setUpdatedBy(GetLoggedInEmployee.getLoggedInEmployeeCode());
 			res = employeeService.updateEmployee(employee);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
@@ -81,10 +82,10 @@ public class EmployeeController {
 
 	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_CHANGE_STATUS')")
 	@PutMapping("/updateEmpStatus/{empCode}")
-	public ResponseEntity<String> updateEmployeeStatus(@PathVariable String empCode,@RequestParam Status newStatus,@RequestParam String updatedBy) {
+	public ResponseEntity<String> updateEmployeeStatus(@PathVariable String empCode,@RequestParam Status newStatus) {
 		boolean res = false;
 		try {
-			res = employeeService.updateEmployeeStatus(empCode,newStatus,updatedBy);
+			res = employeeService.updateEmployeeStatus(empCode,newStatus,GetLoggedInEmployee.getLoggedInEmployeeCode());
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -95,25 +96,6 @@ public class EmployeeController {
 		}else {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update EmployeeStatus");
 		}
-	}
-
-	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_DELETE')")
-	@DeleteMapping("/deleteEmployee/{empCode}")
-	public ResponseEntity<String>  deleteEmployee(@PathVariable String empCode){
-		boolean res = false;
-		try {
-			res = employeeService.deleteEmployee(empCode);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("Employee deleted successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete Employee");
-		}
-		
 	}
 	
 	

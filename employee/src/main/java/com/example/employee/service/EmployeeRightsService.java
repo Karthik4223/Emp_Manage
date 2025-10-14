@@ -6,13 +6,10 @@ import com.example.employee.customException.EmployeeException;
 import com.example.employee.model.EmployeeRights;
 
 public interface EmployeeRightsService {
-	boolean addEmployeeRights(EmployeeRights employeeRights, String group, String createdBy) throws EmployeeException;
+	boolean addEmployeeRights(EmployeeRights employeeRights, String createdBy) throws EmployeeException;
 
 	List<EmployeeRights> getAllEmployeeRights();
 	
 	 EmployeeRights getEmployeeRightsByEmpCode(String emp_code) throws EmployeeException;
-
-
-	boolean deleteEmployeeRights(String emp_code,  List<String> right_code) throws EmployeeException;
 
 }

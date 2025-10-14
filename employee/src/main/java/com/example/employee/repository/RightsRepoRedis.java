@@ -19,6 +19,6 @@ public interface RightsRepoRedis {
 
 	Rights getRightById(String right_code);
 	
-	List<String> getRightsByGroup(String group);
+//	List<String> getRightsByGroup(String group);
 
 }

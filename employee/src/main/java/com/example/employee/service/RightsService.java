@@ -16,7 +16,4 @@ public interface RightsService {
 
 	boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteRights(String rightCode) throws EmployeeException;
-
-
 }

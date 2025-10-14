@@ -16,10 +16,8 @@ public interface EmployeeService {
 
 	boolean updateEmployeeStatus(String empCode, Status newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteEmployee(String empCode) throws EmployeeException;
-
 	List<Employee> searchEmployees(SearchCriteria criteria) throws EmployeeException;
 	
-	Employee getAllEmployeeById(String emp_code) throws EmployeeException;
+	Employee getEmployeeById(String emp_code) throws EmployeeException;
 
 }

@@ -125,32 +125,7 @@ public class RightsServiceImpl implements RightsService{
 		return false;
 	}
 
-	@Override
-	@Transactional(rollbackFor = EmployeeException.class)
-	public boolean deleteRights(String rightCode) throws EmployeeException {
-		try {
-			if (rightCode == null || rightCode.isEmpty()) {
-	            throw new EmployeeException("Right code is mandatory");
-	        }
-	                	
-	    	if (!Validate.isAlphaNumeric(rightCode)) {
-	            throw new EmployeeException("Right code must be alphanumeric");
-	        }   
-	    
-	    	
-			boolean res= rightsRepo.deleteRights(rightCode);
-			if(res) {
-				return rightsRepoRedis.deleteRights(rightCode);
-			}
-		} catch (EmployeeException e) {
-			log.error(e.getMessage(),e);
-	        throw e;
-	    } catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        throw new EmployeeException("Failed to delete right");
-	    }
-		return false;
-	}
+	
 	
 	private String genRightCode() {
 		String prefix = "RIG";

@@ -5,14 +5,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRightsService } from "../../services/rightsService";
 import { useEmployeeRightsService } from "../../services/employeeRightsService";
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { useSelector } from "react-redux";
 
 function RightsMapping() {
   const { getAllRights } = useRightsService();
   const { getEmployeeRights, assignEmployeeRights } = useEmployeeRightsService();
   const { empCode } = useParams();
-  const { empCode: contextEmpCode } = useContext(AuthContext);
+  const contextEmpCode = useSelector((state) => state.auth.empCode);
 
   const [allRights, setAllRights] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
@@ -42,7 +41,8 @@ function RightsMapping() {
     const fetchRightsData = async () => {
       try {
         const rights = await getAllRights();
-        setAllRights(rights);
+        const activeRights = rights.filter(right => right.rightStatus === 'ACTIVE');
+        setAllRights(activeRights.sort ((a, b) => a.rightName.localeCompare(b.rightName)));
 
         const empRights = await getEmployeeRights(empCode);
         setSelectedRight(empRights.rightCode || []);
@@ -110,12 +110,12 @@ function RightsMapping() {
     <div className="content">
       <h2>Rights Mapping- {empCode}</h2>
 
-      <h5 style={{ fontWeight: 'normal', fontStyle: 'italic', marginTop: '10px', marginBottom: '20px' }}>Assigns Rights Individually or by Group</h5>
+      <h5 style={{ fontWeight: 'normal', fontStyle: 'italic', marginTop: '10px', marginBottom: '20px' }}>Assigns Rights Individually</h5>
 
       <div className="custom-form-group" style={{display: 'flex', justifyContent: 'center'}}>
         <div className="custom-form-group-button" style={{ marginBottom: '20px', gap: '10px', display: 'flex' }}>
         <button onClick={() => setMode("selected")}>Assign Selected Rights</button>
-        <button onClick={() => setMode("group")}>Assign by Group</button>
+        {/* <button onClick={() => setMode("group")}>Assign by Group</button> */}
       </div>
      </div>
 

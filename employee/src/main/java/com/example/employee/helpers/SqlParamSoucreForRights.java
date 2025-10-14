@@ -17,7 +17,6 @@ public class SqlParamSoucreForRights {
 		param.addValue("right_code", rights.getRightCode());
 		param.addValue("right_name", rights.getRightName());
 		param.addValue("right_status", rights.getRightStatus().getCode());
-		param.addValue("right_group", rights.getGroup());
 		param.addValue("createdDateTime", rights.getRightCreatedDateTime());
 		param.addValue("updatedDateTime", LocalDateTime.now());
 		param.addValue("createdBy", rights.getCreatedBy());

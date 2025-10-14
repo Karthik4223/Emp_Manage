@@ -2,7 +2,7 @@ package com.example.employee.helpers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -14,10 +14,10 @@ public class EmployeeRightsRowMapper implements RowMapper<EmployeeRights>{
 	public EmployeeRights mapRow(ResultSet rs, int rowNum) throws SQLException {
 		EmployeeRights employeeRights = new EmployeeRights();
 		employeeRights.setEmpCode(rs.getString("emp_code"));
-		employeeRights.setRightCode(new ArrayList<>());
+		employeeRights.setRightCode(new LinkedList<>());
 		employeeRights.getRightCode().add(rs.getString("right_code"));
 		
-		employeeRights.setRightName(new ArrayList<>());
+		employeeRights.setRightName(new LinkedList<>());
         employeeRights.getRightName().add(rs.getString("right_name"));
 
 		employeeRights.setEmpRightCreatedDateTime(rs.getTimestamp("createdDateTime").toLocalDateTime());

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.EmployeeRequestStatus;
-import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.helpers.MessageCauseForException;
 import com.example.employee.model.EmployeeRequest;
 import com.example.employee.repository.EmployeeRequestRepo;
@@ -42,11 +41,6 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			Validate.validateEmployeeRequest(employeeRequest);
 			employeeRequest.setEmpRequestStatus(EmployeeRequestStatus.CREATED);
 			employeeRequest.setEmpCreatedDateTime(LocalDateTime.now());
-			
-			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),employeeRequest.getCreatedBy());
-			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(employeeRequest.getCreatedBy())) {
-				throw new EmployeeException("The loggedIn user miss-match");
-			}
 			
 			
 			List<EmployeeRequest> employeeReqByPhoneNumberAndEmail = employeeRequestRepo.getEmployeeRequestByPhonenumberAndEmail(employeeRequest.getPhoneNumber(),employeeRequest.getEmail());
@@ -80,25 +74,6 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 
 	@Override
 	@Transactional(rollbackFor = EmployeeException.class)
-	public boolean updateEmployeeRequest(EmployeeRequest employeeRequest) throws EmployeeException {
-		try {
-			Validate.validateEmployeeRequest(employeeRequest);
-			employeeRequest.setCreatedBy(GetLoggedInEmployee.getLoggedInEmployeeCode());
-			
-			employeeRequest.setEmpUpdatedDateTime(LocalDateTime.now());
-			employeeRequest.setUpdatedBy("ADMIN");
-			return employeeRequestRepo.updateEmployeeRequest(employeeRequest);
-		} catch (EmployeeException e) {
-			log.error(e.getMessage(),e);
-	        throw e;
-	    } catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        throw new EmployeeException("Failed to update employee");
-	    }
-	}
-
-	@Override
-	@Transactional(rollbackFor = EmployeeException.class)
 	public boolean updateEmployeeRequestStatus(Integer emp_RequestId, EmployeeRequestStatus newStatus, String updatedBy) throws EmployeeException {
 		try {
 			
@@ -109,37 +84,32 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 			if (emp_RequestId <0) {
 	            throw new EmployeeException("EmployeeRequest id cannot be negative");
 	        }  
-			
-			log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),updatedBy);
-			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(updatedBy)) {
-				throw new EmployeeException("The loggedIn user miss-match");
-			}
 	    	
-			
-			
-			log.info(GetLoggedInEmployee.getLoggedInEmployeeCode());
-			
+					
 			EmployeeRequest employeeRequest = employeeRequestRepo.getEmployeeRequestById(emp_RequestId);
 			
 			if(EmployeeRequestStatus.TRANSIT.equals(employeeRequest.getEmpRequestStatus()) || EmployeeRequestStatus.APPROVED.equals(employeeRequest.getEmpRequestStatus())) {
 				throw new EmployeeException("The Employee request is already been approved by some other user");
 			}
 			
-			if(EmployeeRequestStatus.REJECTED.equals(newStatus)) {
-				return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.REJECTED,updatedBy);
+			if(EmployeeRequestStatus.REJECTED.equals(employeeRequest.getEmpRequestStatus())) {
+				throw new EmployeeException("The Employee request is already been rejected by some other user");
 			}
 			
-//			if(newStatus==EmployeeRequestStatus.APPROVED) {
+			if(EmployeeRequestStatus.REJECTED.equals(newStatus)) {
+				return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.REJECTED,updatedBy,null);
+			}
+						
 				jmsTemplate.send(QUEUE_STRING, session -> {
 					MapMessage message = session.createMapMessage();
 					message.setInt("emp_RequestId",emp_RequestId);
+					message.setString("updatedBy", updatedBy);
 					message.setString("newStatus", newStatus.name());
 					message.setJMSType("ChangeEmployeeRequestStatus");
 					return message;
 					});
-//			}
-			
-			return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.TRANSIT,updatedBy);
+				
+			return 	employeeRequestRepo.updateEmployeeRequestStatus(emp_RequestId, EmployeeRequestStatus.TRANSIT,updatedBy,null);
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
 	        throw e;
@@ -149,29 +119,7 @@ public class EmployeeRequestServiceImpl implements EmployeeRequestService{
 	    }
 	}
 
-	@Override
-	@Transactional(rollbackFor = EmployeeException.class)
-	public boolean deleteEmployeeRequest(Integer emp_RequestId) throws EmployeeException {
-		try {
-			if (emp_RequestId == null) {
-	            throw new EmployeeException("Employee code is mandatory");
-	        }
-			
-			if (emp_RequestId <0) {
-	            throw new EmployeeException("Employee id cannot be negative");
-	        }  
-	                	  	    
-			return employeeRequestRepo.deleteEmployeeRequest(emp_RequestId);
-			
-		} catch (EmployeeException e) {
-			log.error(e.getMessage(),e);
-	        throw e;
-	    } catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        throw new EmployeeException("Failed to delete employee");
-	    }
-	}
-
+	
 	@Override
 	public boolean addEmployeeRequests(List<EmployeeRequest> employees) throws EmployeeException {
 		try {

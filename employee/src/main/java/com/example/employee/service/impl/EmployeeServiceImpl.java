@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.enums.Status;
-import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.Employee;
 import com.example.employee.model.SearchCriteria;
 import com.example.employee.repository.EmployeeRepo;
@@ -55,7 +54,8 @@ public class EmployeeServiceImpl implements EmployeeService{
 			
 			
 			if(res) {
-				return employeeRepoSolr.addEmployeeToSolr(employeeRepo.getAllEmployeeById(employee.getEmpCode()));
+				
+				return employeeRepoSolr.addEmployeeToSolr(employeeRepo.getEmployeeById(employee.getEmpCode()));
 			}
 			 
 			return res;
@@ -84,7 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 			employee.setEmpUpdatedDateTime(LocalDateTime.now());
 			boolean res= employeeRepo.updateEmployee(employee);
 			if(res) {
-				return employeeRepoSolr.updateEmployeeInSolr(employeeRepo.getAllEmployeeById(employee.getEmpCode()));
+				return employeeRepoSolr.updateEmployeeInSolr(employeeRepo.getEmployeeById(employee.getEmpCode()));
 			}
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
@@ -108,15 +108,15 @@ public class EmployeeServiceImpl implements EmployeeService{
 	            throw new EmployeeException("Invalid Employee status");
 	    	}
 	    	
-	    	log.info("{} - {}",GetLoggedInEmployee.getLoggedInEmployeeCode(),updatedBy);
-			if(!GetLoggedInEmployee.getLoggedInEmployeeCode().equalsIgnoreCase(updatedBy)) {
-				throw new EmployeeException("The loggedIn user miss-match");
-			}
-			
+	    	Employee employee = employeeRepo.getEmployeeById(empCode);
+	    	
+	    	if(employee.getEmployeeStatus().equals(newStatus)) {
+	    		throw new EmployeeException("The employee is already been "+newStatus.name().toLowerCase()+"ed by "+employee.getUpdatedBy());
+	    	}
 	    	
 			boolean res= employeeRepo.updateEmployeeStatus(empCode, newStatus, updatedBy);
 			if(res) {
-				return employeeRepoSolr.updateEmployeeInSolr(employeeRepo.getAllEmployeeById(empCode));
+				return employeeRepoSolr.updateEmployeeInSolr(employeeRepo.getEmployeeById(empCode));
 			}
 		} catch (EmployeeException e) {
 			log.error(e.getMessage(),e);
@@ -124,29 +124,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 	    } catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        throw new EmployeeException("Failed to update employee");
-	    }
-		return false;
-	}
-
-
-	@Override
-	@Transactional(rollbackFor = EmployeeException.class)
-	public boolean deleteEmployee(String empCode) throws EmployeeException {
-		try {
-	    	
-			Validate.validateEmpCode(empCode);
-			
-	    
-			boolean res= employeeRepo.deleteEmployee(empCode);
-			if(res) {
-				return employeeRepoSolr.deleteEmployeeFromSolr(empCode);
-			}
-		} catch (EmployeeException e) {
-			log.error(e.getMessage(),e);
-	        throw e;
-	    } catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        throw new EmployeeException("Failed to delete employee");
 	    }
 		return false;
 	}
@@ -189,7 +166,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
 
 	@Override
-	public Employee getAllEmployeeById(String emp_code) throws EmployeeException {
+	public Employee getEmployeeById(String emp_code) throws EmployeeException {
 		try {
 			Validate.validateEmpCode(emp_code);
 			return employeeRepoSolr.getEmployeeById(emp_code);			

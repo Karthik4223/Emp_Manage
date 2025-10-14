@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -231,18 +230,14 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 		List<String> queryParts = new ArrayList<>();
 
 		if (criteria.getEmployeeNames() != null && !criteria.getEmployeeNames().isEmpty()) {
-		    String namesQuery = criteria.getEmployeeNames().stream()
-		                        .map(name -> "name:*" + name + "*")
-		                        .filter(s -> !s.isEmpty())
-		                        .collect(Collectors.joining(" OR "));
+
+		    String namesQuery = "name:*" + criteria.getEmployeeNames() + "*";
+
 		    if (!namesQuery.isEmpty()) queryParts.add(namesQuery);
 		}
 
 		if (criteria.getEmployeeDepartment() != null && !criteria.getEmployeeDepartment().isEmpty()) {
-		    String depQuery = criteria.getEmployeeDepartment().stream()
-		                        .map(dep -> "department:*" + dep + "*")
-		                        .filter(s -> !s.isEmpty())
-		                        .collect(Collectors.joining(" OR "));
+		    String depQuery = "department:*" + criteria.getEmployeeDepartment() + "*" ;
 		    if (!depQuery.isEmpty()) queryParts.add(depQuery);
 		}
 
@@ -251,26 +246,20 @@ public class EmployeeRepoImplSolr implements EmployeeRepoSolr{
 		}
 
 		if (criteria.getEmployeeEmail() != null && !criteria.getEmployeeEmail().isEmpty()) {
-		    String emailQuery = criteria.getEmployeeEmail().stream()
-		                        .map(email -> "email:*" + email + "*")
-		                        .filter(s -> !s.isEmpty())
-		                        .collect(Collectors.joining(" OR "));
+		    String emailQuery = "email:*" + criteria.getEmployeeEmail() + "*";
+		    
 		    if (!emailQuery.isEmpty()) queryParts.add(emailQuery);
 		}
 
 		if (criteria.getEmployeeCode() != null && !criteria.getEmployeeCode().isEmpty()) {
-		    String codeQuery = criteria.getEmployeeCode().stream()
-		                        .map(code -> "emp_code:*" + code + "*")
-		                        .filter(s -> !s.isEmpty())
-		                        .collect(Collectors.joining(" OR "));
+		    String codeQuery = "emp_code:*" + criteria.getEmployeeCode() + "*";
+		    
 		    if (!codeQuery.isEmpty()) queryParts.add(codeQuery);
 		}
 
 		if (criteria.getEmployeePhoneNumber() != null && !criteria.getEmployeePhoneNumber().isEmpty()) {
-		    String phoneQuery = criteria.getEmployeePhoneNumber().stream()
-		                        .map(phone -> "phone_number:*" + phone + "*")
-		                        .filter(s -> !s.isEmpty())
-		                        .collect(Collectors.joining(" OR "));
+		    String phoneQuery = "phone_number:*" + criteria.getEmployeePhoneNumber() + "*";
+		                       
 		    if (!phoneQuery.isEmpty()) queryParts.add(phoneQuery);
 		}
 

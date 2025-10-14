@@ -8,14 +8,14 @@ export const useEmployeeService = () => {
     return response.data;
   };
 
-  const updateEmployeeStatus = async (empCode, newStatus, updatedBy) => {
+  const updateEmployeeStatus = async (empCode, newStatus) => {
     const response = await api.put(
-      `/updateEmpStatus/${empCode}?newStatus=${newStatus}&updatedBy=${updatedBy}`
+      `/updateEmpStatus/${empCode}?newStatus=${newStatus}`
     );
     return response.data;
   };
 
-  const searchEmployees = async (payload,token) => {
+  const searchEmployees = async (payload) => {
     const response = await api.post("/search", payload);
     console.log(response);
     return response;

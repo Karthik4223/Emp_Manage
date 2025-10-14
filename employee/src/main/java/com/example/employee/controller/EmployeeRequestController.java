@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.employee.enums.EmployeeRequestStatus;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.EmployeeRequest;
 import com.example.employee.service.EmployeeRequestService;
 import com.example.employee.service.impl.EmployeeExcelService;
@@ -40,6 +40,7 @@ public class EmployeeRequestController {
 	public ResponseEntity<String> addEmployeeRequest(@RequestBody EmployeeRequest employeeRequest){
 		boolean res;
 		try {
+			employeeRequest.setCreatedBy(GetLoggedInEmployee.getLoggedInEmployeeCode());
 			res = employeeRequestService.addEmployeeRequest(employeeRequest);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
@@ -60,32 +61,14 @@ public class EmployeeRequestController {
 		
 	}
 	
-	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_UPDATE')")
-	@PutMapping("/updateEmployeeRequest")
-	public ResponseEntity<String> updateEmployeeRequest(@RequestBody EmployeeRequest employeeRequest) {
-		boolean res = false;
-		try {
-			res = employeeRequestService.updateEmployeeRequest(employeeRequest);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("EmployeeRequest updated successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update EmployeeRequest");
-		}
-		
-	}
 
 	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_APPROVE_REJECT')")
 	@PutMapping("/updateEmployeeRequestStatus/{ReqId}")
-	public ResponseEntity<String> updateEmployeeRequestStatus(@PathVariable Integer ReqId,@RequestParam EmployeeRequestStatus newStatus,@RequestParam String updatedBy) {
+	public ResponseEntity<String> updateEmployeeRequestStatus(@PathVariable Integer ReqId,@RequestParam EmployeeRequestStatus newStatus) {
 				
 		boolean res = false;
 		try {
-			res = employeeRequestService.updateEmployeeRequestStatus(ReqId, newStatus, updatedBy);
+			res = employeeRequestService.updateEmployeeRequestStatus(ReqId, newStatus, GetLoggedInEmployee.getLoggedInEmployeeCode());
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -99,30 +82,12 @@ public class EmployeeRequestController {
 	}
 	
 	
-	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_REQUEST_DELETE')")
-	@DeleteMapping("/deleteEmployeeRequest/{ReqId}")
-	public ResponseEntity<String>  deleteEmployeeRequest(@PathVariable Integer ReqId){
-		boolean res = false;
-		try {
-			res = employeeRequestService.deleteEmployeeRequest(ReqId);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("EmployeeRequest deleted successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete EmployeeRequest");
-		}
-	}
-	
 	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_CREATE_EXCEL')")
     @PostMapping("/upload-excel")
-    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file,@RequestParam String createdBy) {
+    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file) {
     	 boolean res = false;
     	try {
-            List<EmployeeRequest> employees = employeeExcelService.parseExcel(file,createdBy);
+            List<EmployeeRequest> employees = employeeExcelService.parseExcel(file,GetLoggedInEmployee.getLoggedInEmployeeCode());
             
            res=employeeRequestService.addEmployeeRequests(employees);
         } catch (Exception e) {

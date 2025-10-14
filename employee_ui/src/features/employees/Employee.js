@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { useState,useEffect,useCallback } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -6,18 +6,22 @@ import CreateEmployee from "./CreateEmployee";
 
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { AuthContext } from "../../context/AuthContext";
 import { useEmployeeService } from "../../services/employeeService";
+import { useLocationService } from "../../services/locationService";
+import { useSelector,useDispatch } from "react-redux";
+import { clearAuthData } from "../../features/auth/authSlice";
+
+
 
 
 function Employee({onNavigate}) {
   const { getAllEmployees, updateEmployeeStatus, searchEmployees } = useEmployeeService();
-  const { rightsNames, token } = useContext(AuthContext) || [];
+  const rightsNames = useSelector((state) => state.auth.rights);
   const [employeeDetails, setEmployeeDetails] = useState([]);
   const [editPopupOpen, setEditPopupOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { empCode } = useContext(AuthContext);
+  const dispatch = useDispatch();
 
   const [filterPopupOpen, setFilterPopupOpen] = useState(false);
   const [filterData, setFilterData] = useState({
@@ -38,14 +42,23 @@ function Employee({onNavigate}) {
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
 
+  const { countryMap, stateMap } = useLocationService();
 
-  
   const fetchEmployeeDetails = useCallback(async () => {
   try {
     const  data  = await getAllEmployees();
     setEmployeeDetails(data);
   } catch (error) {
-    toast.error("Error fetching employee details.");
+    if(error.message === "Session invalid or expired" || error.message === "No session found"){
+      toast.error("Session expired. Logging out...",{
+        onClose: () => dispatch(clearAuthData()),
+        autoClose: 1500,
+      });
+
+      return;
+    }
+    console.error(error);
+    toast.error(error.message);
   } 
   }, [getAllEmployees]);
 
@@ -65,9 +78,9 @@ function Employee({onNavigate}) {
   const handleStatusChange = async (empCode, currentStatus) => {
     const newStatus = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     try {
-      await updateEmployeeStatus(empCode, newStatus, empCode);
+      await updateEmployeeStatus(empCode, newStatus);
 
-      toast.success(`Employee: ${empCode} ${currentStatus.toLowerCase()}d successfully.`);
+      toast.success(`Employee: ${empCode} ${newStatus.toLowerCase()}d successfully.`);
       filterPopupOpen || Object.values(filterData).some((v) => v) ? fetchFilteredEmployees() : fetchEmployeeDetails();
     } catch (error) {
       toast.error(error.message || "Error updating employee status.");
@@ -91,7 +104,7 @@ function Employee({onNavigate}) {
 
       try {
         console.log("Applying filter with data:", payload);
-        const data = await searchEmployees(payload, token);
+        const data = await searchEmployees(payload);
         console.log("Filtered employees:", data);
         setEmployeeDetails(data.data);
         toast.success("Filter applied successfully.");
@@ -175,8 +188,8 @@ function Employee({onNavigate}) {
                   }
                   try {
                     setIsLoading(true);
-                    const payload = { employeeNames: [query] };
-                    const { data } = await searchEmployees(payload, token);
+                    const payload = { employeeNames: query };
+                    const { data } = await searchEmployees(payload);
                     console.log(data);
                     setNameOptions(data.map((emp) => emp.name));
                     
@@ -208,8 +221,8 @@ function Employee({onNavigate}) {
                     return;
                   }
                   try {
-                    const payload = { employeeEmail: [query] };
-                    const { data } = await searchEmployees(payload,token);
+                    const payload = { employeeEmail: query };
+                    const { data } = await searchEmployees(payload);
                     console.log(data);
                     setEmailOptions(data.map((emp) => emp.email));
                     
@@ -236,8 +249,8 @@ function Employee({onNavigate}) {
                     return;
                   }
                   try {
-                    const payload = { employeePhoneNumber: [query] };
-                    const { data } = await searchEmployees(payload,token);
+                    const payload = { employeePhoneNumber: query };
+                    const { data } = await searchEmployees(payload);
                     setPhoneOptions(data.map((emp) => emp.phoneNumber));
                     
                   } catch (error) {
@@ -263,8 +276,8 @@ function Employee({onNavigate}) {
                     return;
                   }
                   try {
-                    const payload = { employeeCode: [query] };
-                    const { data } = await searchEmployees(payload,token);
+                    const payload = { employeeCode: query };
+                    const { data } = await searchEmployees(payload);
                     setEmpCodeOptions(data.map((emp) => emp.empCode));
                     
                   } catch (error) {
@@ -290,8 +303,8 @@ function Employee({onNavigate}) {
                     return;
                   }
                   try {
-                    const payload = { employeeDepartment: [query] };
-                    const { data } = await searchEmployees(payload, token);
+                    const payload = { employeeDepartment: query };
+                    const { data } = await searchEmployees(payload);
                     setDepartmentOptions([...new Set(data.map((emp) => emp.empDepartment))]);
                   } catch (error) {
                     console.error(error);
@@ -321,7 +334,7 @@ function Employee({onNavigate}) {
 
                   try {
                     const payload = { employeeStatus: query };
-                    const { data } = await searchEmployees(payload, token);
+                    const { data } = await searchEmployees(payload);
                     setStatusOptions([...new Set(data.map((emp) => emp.employeeStatus))]);
                   } catch (error) {
                     console.error(error);
@@ -356,7 +369,7 @@ function Employee({onNavigate}) {
                   setIsLoading(true);
                   
                   const payload = { searchKey: query };
-                  const { data } = await searchEmployees(payload,token);
+                  const { data } = await searchEmployees(payload);
                   setSearchKeyOptions(data);
                   
                 } catch (error) {
@@ -446,9 +459,10 @@ function Employee({onNavigate}) {
               <td>{employee.empDepartment.charAt(0).toUpperCase() + employee.empDepartment.slice(1).toLowerCase()}</td>
               <td>{employee.gender.charAt(0).toUpperCase() + employee.gender.slice(1).toLowerCase()}</td>
               <td>{employee.employeeStatus.charAt(0).toUpperCase() + employee.employeeStatus.slice(1).toLowerCase()}</td>
-              <td>{employee.country}</td>
-              <td>{employee.state}</td>
+              <td>{countryMap[employee.country]}</td>
+              <td>{stateMap[employee.state]}</td>
               <td>{employee.city}</td>
+
               <td>{employee.empCreatedDateTime}</td>
               <td>{employee.empUpdatedDateTime}</td>
               <td>{employee.createdBy.charAt(0).toUpperCase() + employee.createdBy.slice(1).toLowerCase()}</td>

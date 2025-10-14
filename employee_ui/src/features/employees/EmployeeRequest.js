@@ -3,18 +3,18 @@ import { useState,useEffect,useCallback } from "react";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
 import { useEmployeeRequestService } from "../../services/employeeRequestService";
+import { useSelector,useDispatch } from "react-redux";
+import { clearAuthData } from "../../features/auth/authSlice";
 
 function EmployeeRequest() {
   const { getAllEmployeeRequests, updateEmployeeRequestStatus } = useEmployeeRequestService();
-  const { rightsNames } = useContext(AuthContext) || [];
-  const { empCode } = useContext(AuthContext);
+  const rightsNames = useSelector((state) => state.auth.rights);
   const [employeeRequests, setEmployeeRequests] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
   const [statusFilter, setStatusFilter] = useState("CREATED");
+  const dispatch = useDispatch();
 
    useEffect(() => {
       if (message) {
@@ -43,9 +43,16 @@ function EmployeeRequest() {
       const { data } = await getAllEmployeeRequests();
       setEmployeeRequests(data);
       } catch (error) {
-        console.log(error);
-        setMessage("Error fetching employee requests.");
-        setMessageType("error");
+          if(error.message === "Session invalid or expired" || error.message === "No session found"){
+              toast.error("Session expired. Logging out...",{
+              onClose: () => dispatch(clearAuthData()),
+              autoClose: 1500,
+            });
+      
+            return;
+          }
+          setMessage(error.message);
+          setMessageType("error");
       }
     }, [getAllEmployeeRequests]);
 
@@ -57,7 +64,7 @@ function EmployeeRequest() {
 
   const handleRequest = async (empRequestId, action) => {
     try {
-      await updateEmployeeRequestStatus(empRequestId, action, empCode);
+      await updateEmployeeRequestStatus(empRequestId, action);
       setMessage(`Request ${action.toLowerCase()} successfully.`);
       setMessageType("success");
       fetchEmployeeRequests();

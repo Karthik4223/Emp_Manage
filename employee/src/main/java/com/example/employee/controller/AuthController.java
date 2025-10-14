@@ -4,19 +4,29 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.employee.customException.EmployeeException;
-import com.example.employee.helpers.JwtUtil;
 import com.example.employee.model.Employee;
 import com.example.employee.model.EmployeeLogin;
 import com.example.employee.model.EmployeeRights;
@@ -40,21 +50,23 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     
     @Autowired
-    private JwtUtil jwtUtil;
+    private RedisTemplate<String, Object> redisTemplate;
+    
+
     
     @PostMapping("/login") 
-    public ResponseEntity<?> authenticate(@RequestBody EmployeeLogin employeeLogin, HttpSession session) {
+    public ResponseEntity<?> authenticate(@RequestBody EmployeeLogin employeeLogin, HttpServletRequest request) {
 
         String empCode = employeeLogin.getEmpCode();
         String password = employeeLogin.getPassword();
 
         try {
-            Employee employee = employeeService.getAllEmployeeById(empCode);
+            Employee employee = employeeService.getEmployeeById(empCode);
             if (employee == null) {
                 return ResponseEntity.status(404).body("Employee not found");
             }
 
-            if (employee.getEmployeeStatus() != null && employee.getEmployeeStatus().toString().equals("INACTIVE")) {
+            if (employee.getEmployeeStatus() != null && "INACTIVE".equals(employee.getEmployeeStatus().toString())) {
                 return ResponseEntity.status(403).body("Employee is inactive");
             }
             
@@ -65,11 +77,6 @@ public class AuthController {
                 passwordMatches = passwordEncoder.matches(password, storedPassword);
             } else {
                 passwordMatches = password.equals(storedPassword);
-                if(passwordMatches) {
-                    String hashed = passwordEncoder.encode(storedPassword);
-                    employee.setEmpPassword(hashed);
-                    employeeService.updateEmployee(employee);
-                }
             }
 
             if (!passwordMatches) {
@@ -79,32 +86,39 @@ public class AuthController {
             
             EmployeeRights employeeRights = employeeRightsService.getEmployeeRightsByEmpCode(empCode);
             
-            
-            List<String> empRightsCodes = Collections.EMPTY_LIST;
-            if(employeeRights != null && employeeRights.getRightCode() != null && !employeeRights.getRightCode().isEmpty()) {
-            	empRightsCodes = employeeRights.getRightCode();
-            }
-            
-            
             List<String> empRightsNames = Collections.EMPTY_LIST;
             if(employeeRights != null && employeeRights.getRightName() != null && !employeeRights.getRightName().isEmpty()) {
             	empRightsNames = employeeRights.getRightName();
             }
             
+
+            HttpSession session = request.getSession(true);
+
+            session.setAttribute("empCode", employee.getEmpCode());
+            session.setAttribute("empName", employee.getName());
+            session.setAttribute("rightsNames", empRightsNames);
+            session.setMaxInactiveInterval(30 * 60);
             
+            List<GrantedAuthority> authorities = empRightsNames.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
 
-            String jwtToken = null;
-			try {
-				jwtToken = jwtUtil.generateToken(employee.getEmpCode(), employee.getName(), empRightsNames);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+            EmployeeLogin userDetails = new EmployeeLogin(empCode, null, empRightsNames);
+            
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            
+            String redisUserKey = "user:" + empCode;
+            redisTemplate.opsForValue().set(redisUserKey, session.getId(),30,TimeUnit.MINUTES);
+
+            
             Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("token", jwtToken);
+            responseBody.put("empCode", employee.getEmpCode());
+            responseBody.put("empName", employee.getName());
             responseBody.put("rightsNames", empRightsNames);
-            responseBody.put("rightsCodes", empRightsCodes);
-                        
+                       
             return ResponseEntity.ok(responseBody);
             
         } catch (EmployeeException e) {
@@ -114,7 +128,52 @@ public class AuthController {
 
     }
     
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request,HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+        	String redisKey = "user:" + session.getAttribute("empCode");
+	        String sessionId = (String) redisTemplate.opsForValue().get(redisKey);
+
+	        if(session.getId().equals(sessionId)) {
+	        	String empCode = (String) session.getAttribute("empCode");
+	        	redisTemplate.delete("user:" + empCode);
+	        }
+             
+             session.invalidate();
+        }
+        
+        
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");          
+        cookie.setHttpOnly(true);     
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        
+        return ResponseEntity.ok("Logged out successfully");
+    }
     
+    
+    @GetMapping("/sessionInfo")
+    public ResponseEntity<?> getSessionInfo(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return ResponseEntity.status(401).body("No active session");
+        }
+
+        String empCode = (String) session.getAttribute("empCode");
+        String empName = (String) session.getAttribute("empName");
+        List<String> rightsNames = (List<String>) session.getAttribute("rightsNames");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("empCode", empCode);
+        response.put("empName", empName);
+        response.put("rightsNames", rightsNames);
+
+        return ResponseEntity.ok(response);
+    }
+
 
 
 }

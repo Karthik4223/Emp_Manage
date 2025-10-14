@@ -7,15 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.EmployeeRights;
 import com.example.employee.service.EmployeeRightsService;
 
@@ -31,10 +30,10 @@ public class EmployeeRightsController {
 	
 	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@PostMapping("/addEmployeeRights")
-	public ResponseEntity<String> addEmployeeRights(@RequestBody EmployeeRights employeeRights, @RequestParam String group, @RequestParam String createdBy){
+	public ResponseEntity<String> addEmployeeRights(@RequestBody EmployeeRights employeeRights){
 		boolean res;
 		try {
-			res = employeeRightsService.addEmployeeRights(employeeRights,group,createdBy);
+			res = employeeRightsService.addEmployeeRights(employeeRights,GetLoggedInEmployee.getLoggedInEmployeeCode());
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -53,23 +52,6 @@ public class EmployeeRightsController {
 		return ResponseEntity.ok(employeeRightsService.getAllEmployeeRights());
 	}
 	
-	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
-	@DeleteMapping("/deleteEmployeeRights/{empCode}")
-	public ResponseEntity<String>  deleteEmployeeRights(@PathVariable String empCode, @RequestBody List<String> rightCode){
-		boolean res = false;
-		try {
-			res = employeeRightsService.deleteEmployeeRights(empCode,rightCode);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("EmployeeRight deleted successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete EmployeeRight");
-		}
-	}
 	
 	@PreAuthorize("hasAuthority('RIGHT_EMPLOYEE_RIGHTS_MAPPING')")
 	@GetMapping("/getEmployeeRights/{emp_code}")

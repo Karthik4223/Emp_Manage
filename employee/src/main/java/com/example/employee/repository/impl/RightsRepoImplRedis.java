@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -92,17 +91,17 @@ public class RightsRepoImplRedis implements RightsRepoRedis {
 	    return objectMapper.convertValue(obj, Rights.class);
 	}
 
-	@Override
-	public List<String> getRightsByGroup(String group) {
-		List<Rights> rights= getAllRights();
-		
-		List<String> rightCodes = rights.stream()
-			        .filter(right -> group.equals(right.getGroup()))
-			        .map(Rights::getRightCode)
-			        .collect(Collectors.toList());
-
-		 return rightCodes;
-	}
+//	@Override
+//	public List<String> getRightsByGroup(String group) {
+//		List<Rights> rights= getAllRights();
+//		
+//		List<String> rightCodes = rights.stream()
+//			        .filter(right -> group.equals(right.getGroup()))
+//			        .map(Rights::getRightCode)
+//			        .collect(Collectors.toList());
+//
+//		 return rightCodes;
+//	}
 
 
 

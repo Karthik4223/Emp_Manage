@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 function NavBar({ onNavigate, activePage }) {
-  const { rightsNames } = useContext(AuthContext) || [];
+  const rightsNames = useSelector((state) => state.auth.rights);
   return (
     <nav className="custom-navbar">
       <ul className="custom-navbar-list">

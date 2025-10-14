@@ -17,11 +17,10 @@ public interface EmployeeRepo {
 	
 	boolean updateEmployeeStatus(String empCode, Status newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteEmployee(String empCode) throws EmployeeException;
-
-	Employee getAllEmployeeById(String emp_code);
+	Employee getEmployeeById(String emp_code);
 
 	Integer getEmpId();
 
+	Employee getEmployeeByEmail(String email);
 
 }

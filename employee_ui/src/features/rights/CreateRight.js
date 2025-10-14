@@ -4,12 +4,13 @@ import { useState,useEffect } from "react";
 import { useRightsService } from "../../services/rightsService";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { useSelector,useDispatch } from "react-redux";
+import { clearAuthData } from "../../features/auth/authSlice";
 
 function CreateRight() {
     const { createRight } = useRightsService();
-    const { empCode } = useContext(AuthContext);
+    const empCode = useSelector((state) => state.auth.empCode);
+    const dispatch = useDispatch();
 
     const [Right, setRight] = useState({
         rightName: '',
@@ -46,6 +47,14 @@ function CreateRight() {
             setMessageType("success");
             setRight({ rightName: "", group: "" });
         } catch (err) {
+            if(err.message === "Session invalid or expired" || err.message === "No session found"){
+                toast.error("Session expired. Logging out...",{
+                onClose: () => dispatch(clearAuthData()),
+                autoClose: 1500,
+                });
+        
+                return;
+            }
             setMessage(err.message || "Error creating right.");
             setMessageType("error");
         }

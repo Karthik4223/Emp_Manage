@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.employee.customException.EmployeeException;
 import com.example.employee.model.EmployeeRights;
@@ -31,17 +30,14 @@ public class EmployeeRightsServiceImpl implements EmployeeRightsService {
 	private RightsRepoImplRedis rightsRepoImplRedis;
 
 	@Override
-	public boolean addEmployeeRights(EmployeeRights employeeRights, String group,String createdBy) throws EmployeeException {
+	public boolean addEmployeeRights(EmployeeRights employeeRights,String createdBy) throws EmployeeException {
 	    try {
 	        Validate.validateEmployeeRights(employeeRights);
 	        
 	        List<String> rightsToAssign;
 
-	        if (group != null && !group.isEmpty()) {
-	            rightsToAssign = rightsRepoImplRedis.getRightsByGroup(group);
-	        } else {
-	            rightsToAssign = employeeRights.getRightCode() != null ? employeeRights.getRightCode() : Collections.emptyList();
-	        }
+	        rightsToAssign = employeeRights.getRightCode() != null ? employeeRights.getRightCode() : Collections.emptyList();
+	        
 	        
 	        EmployeeRights employeeRightsExisting = employeeRightsMappingRepo.getEmployeeRightsByEmpCode(employeeRights.getEmpCode());
 
@@ -103,28 +99,28 @@ public class EmployeeRightsServiceImpl implements EmployeeRightsService {
 
 	}
 
-	@Override
-	@Transactional(rollbackFor = EmployeeException.class)
-	public boolean deleteEmployeeRights(String emp_code,  List<String> right_code) throws EmployeeException {
-		try {
-			if (emp_code == null || emp_code.isEmpty()) {
-	            throw new EmployeeException("Employee code is mandatory");
-	        }
-			
-			if (right_code == null || right_code.isEmpty()) {
-	            throw new EmployeeException("Right code is mandatory");
-	        }
-	    
-			return employeeRightsMappingRepo.deleteEmployeeRights(emp_code,right_code);
-			
-		} catch (EmployeeException e) {
-			log.error(e.getMessage(),e);
-	        throw e;
-	    } catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        throw new EmployeeException("Failed to delete employee right");
-	    }
-	}
+//	@Override
+//	@Transactional(rollbackFor = EmployeeException.class)
+//	public boolean deleteEmployeeRights(String emp_code,  List<String> right_code) throws EmployeeException {
+//		try {
+//			if (emp_code == null || emp_code.isEmpty()) {
+//	            throw new EmployeeException("Employee code is mandatory");
+//	        }
+//			
+//			if (right_code == null || right_code.isEmpty()) {
+//	            throw new EmployeeException("Right code is mandatory");
+//	        }
+//	    
+//			return employeeRightsMappingRepo.deleteEmployeeRights(emp_code,right_code);
+//			
+//		} catch (EmployeeException e) {
+//			log.error(e.getMessage(),e);
+//	        throw e;
+//	    } catch (Exception e) {
+//			log.error(e.getMessage(),e);
+//	        throw new EmployeeException("Failed to delete employee right");
+//	    }
+//	}
 
 	@Override
 	public EmployeeRights getEmployeeRightsByEmpCode(String emp_code) throws EmployeeException {

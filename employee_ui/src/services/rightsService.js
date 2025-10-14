@@ -13,8 +13,8 @@ export const useRightsService = () => {
     return response.data;
   };
 
-  const updateRightStatus = async (rightCode, newStatus, updatedBy) => {
-    const response = await api.put(`/updateRightStatus/${rightCode}?newStatus=${newStatus}&updatedBy=${updatedBy}`);
+  const updateRightStatus = async (rightCode, newStatus) => {
+    const response = await api.put(`/updateRightStatus/${rightCode}?newStatus=${newStatus}`);
     return response.data;
   };
 

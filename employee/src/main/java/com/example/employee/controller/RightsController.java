@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.employee.enums.Status;
+import com.example.employee.helpers.GetLoggedInEmployee;
 import com.example.employee.model.Rights;
 import com.example.employee.service.RightsService;
 
@@ -55,31 +55,12 @@ public class RightsController {
 	}
 
 	
-	@PreAuthorize("hasAuthority('RIGHT_RIGHTS_UPDATE')")
-	@PutMapping("/updateRight")
-	public ResponseEntity<String> updateRight(@RequestBody Rights right) {
-		boolean res = false;
-		try {
-			res = rightsService.updateRights(right);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update Right");
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("Right updated successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update right");
-		}
-		
-	}
-	
 	@PreAuthorize("hasAuthority('RIGHT_RIGHTS_CHANGE_STATUS')")
 	@PutMapping("/updateRightStatus/{rightCode}")
-	public ResponseEntity<String> updateRightStatus(@PathVariable String rightCode,@RequestParam Status newStatus,@RequestParam String updatedBy) {
+	public ResponseEntity<String> updateRightStatus(@PathVariable String rightCode,@RequestParam Status newStatus) {
 		boolean res = false;
 		try {
-			res = rightsService.updateRightsStatus(rightCode,newStatus,updatedBy);
+			res = rightsService.updateRightsStatus(rightCode,newStatus,GetLoggedInEmployee.getLoggedInEmployeeCode());
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -92,22 +73,5 @@ public class RightsController {
 		}
 	}
 	
-	@PreAuthorize("hasAuthority('RIGHT_RIGHTS_DELETE')")
-	@DeleteMapping("/deleteRight/{rightCode}")
-	public ResponseEntity<String>  deleteEmployee(@PathVariable String rightCode){
-		boolean res = false;
-		try {
-			res = rightsService.deleteRights(rightCode);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-		
-		if(res) {
-			return ResponseEntity.ok("Right deleted successfully.");
-		}else {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete Right");
-		}
-		
-	}
+	
 }

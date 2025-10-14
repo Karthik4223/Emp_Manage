@@ -1,45 +1,49 @@
-import React, { useState, useContext } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import {jwtDecode} from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { setAuthData } from "../features/auth/authSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
-  const [username, setUsername] = useState("");
+  const [empCode, setEmpCode] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      toast.error("Please enter both employee code and password");
-      return;
-    }
 
     try {
       const response = await fetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ empCode: username, password }),
+        credentials: "include",
+        body: JSON.stringify({ empCode, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        login(data.token, data.rightsCodes, data.rightsNames);
-        toast.success(`Logged in as ${jwtDecode(data.token).empName}`);
+        console.log("Login successful:", data);
+        dispatch(
+          setAuthData({
+            empCode: data.empCode,
+            empName: data.empName,
+            rights: data.rightsNames,
+          })
+        );
         navigate("/home");
-        
       } else {
         const errorData = await response.text();
         toast.error(errorData);
       }
-    } catch (err) {
-      toast.error("Login failed. Please try again.");
+    } catch (error) {
+      toast.error(error.message || "Login failed. Please try again.");
+      console.error("Login failed:", error);
     }
   };
 
-  return (
+   return (
     <div className="content">
       <div className="create-employee">
         <h2 className="form-title">Login</h2>
@@ -48,8 +52,8 @@ const LoginPage = () => {
             <label>Employee Code:</label>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={empCode}
+              onChange={(e) => setEmpCode(e.target.value)}
               placeholder="Enter employee code"
             />
           </div>

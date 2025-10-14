@@ -32,6 +32,7 @@ public class EmployeeRepoImpl implements EmployeeRepo{
         
         int rowsEffected = namedParameterJdbcTemplate.update(sqlString, param);
 		
+		
 		return rowsEffected>0;
 	}
 
@@ -44,7 +45,7 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	
 	
 	@Override
-	public Employee getAllEmployeeById(String emp_code) {
+	public Employee getEmployeeById(String emp_code) {
 		String sqlString =" Select emp_code,emp_password,email,department,name,phone_number,gender,country,state,city,emp_status,createdDateTime,updatedDateTime,createdBy,updatedBy from Employees "
 				+ "where emp_code=:emp_code";
 		
@@ -62,7 +63,7 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	@Override
 	public boolean updateEmployee(Employee employee) throws EmployeeException{
 		
-		Employee existingEmployee = getAllEmployeeById(employee.getEmpCode());
+		Employee existingEmployee = getEmployeeById(employee.getEmpCode());
 		
 		boolean logres= logEmployee(existingEmployee);
 
@@ -93,7 +94,7 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	
 	@Override
 	public boolean updateEmployeeStatus(String empCode, Status newStatus, String updatedBy) throws EmployeeException {
-		Employee existingEmployee = getAllEmployeeById(empCode);
+		Employee existingEmployee = getEmployeeById(empCode);
 		
 		boolean logres= logEmployee(existingEmployee);
 
@@ -119,27 +120,6 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 	    return rowsEffected > 0;
 	}
 
-
-	@Override
-	public boolean deleteEmployee(String empCode) throws EmployeeException {
-		
-		Employee existingEmployee = getAllEmployeeById(empCode);
-		
-		boolean logres= logEmployee(existingEmployee);
-
-		if(!logres) {
-			throw new EmployeeException("Failed to log employee before delete");
-		}
-		
-	    String sqlString = "DELETE FROM Employees WHERE emp_code = :emp_code";  
-
-	    MapSqlParameterSource param = new MapSqlParameterSource();
-	    param.addValue("emp_code", empCode); 
-
-	    int rowsEffected = namedParameterJdbcTemplate.update(sqlString, param);
-
-	    return rowsEffected > 0;
-	}
 	
 	
 	private boolean logEmployee(Employee employee) {
@@ -162,6 +142,20 @@ public class EmployeeRepoImpl implements EmployeeRepo{
 		Integer res = namedParameterJdbcTemplate.queryForObject(sqlString, new MapSqlParameterSource(), Integer.class);
 		
 		return res!=null ? res : null;
+	}
+
+	@Override
+	public Employee getEmployeeByEmail(String email) {
+		String sqlString =" Select emp_code,emp_password,email,department,name,phone_number,gender,country,state,city,emp_status,createdDateTime,updatedDateTime,createdBy,updatedBy from Employees "
+				+ "where email=:email";
+		
+		MapSqlParameterSource param = new MapSqlParameterSource();
+	    
+	    param.addValue("email", email); 
+	    
+	    List<Employee> employee = namedParameterJdbcTemplate.query(sqlString, param,new EmployeeRowMapper());
+	    	    
+	    return employee!=null && !employee.isEmpty() ? employee.get(0) : null;
 	}
 
 

@@ -16,8 +16,6 @@ public interface RightsRepo {
 
 	boolean updateRightsStatus(String rightCode, Status newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteRights(String rightCode) throws EmployeeException;
-
 	Rights getRightById(String right_code);
 
 	Integer getRightId();

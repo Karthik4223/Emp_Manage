@@ -12,11 +12,9 @@ public interface EmployeeRequestService {
 
 	List<EmployeeRequest> getAllEmployeeRequests();
 
-	boolean updateEmployeeRequest(EmployeeRequest employeeRequest) throws EmployeeException;
 
 	boolean updateEmployeeRequestStatus(Integer emp_RequestId, EmployeeRequestStatus newStatus, String updatedBy) throws EmployeeException;
 
-	boolean deleteEmployeeRequest(Integer emp_RequestId) throws EmployeeException;
 
 	boolean addEmployeeRequests(List<EmployeeRequest> employees) throws EmployeeException;
 

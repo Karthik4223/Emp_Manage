@@ -13,6 +13,10 @@ HAVING COUNT(*) > 1;
 select * from EmployeeRequests;
 select * from EmployeeRequests_log;
 
+Select emp_RequestId,email,department,name,phone_number,gender,country,state,city,emp_RequestStatus,createdDateTime,updatedDateTime,createdBy,updatedBy from EmployeeRequests
+where (email='pop@pip.in' or phone_number='9465637435') and emp_RequestStatus IN('C','A');
+
+
 select * from Employees_log;
 select * from Employees;
 
@@ -30,7 +34,6 @@ CREATE TABLE Rights (
     right_code VARCHAR(10) UNIQUE NOT NULL , 
     right_name VARCHAR(100) UNIQUE NOT NULL,
 	right_status CHAR(1) NOT NULL, 
-    right_group VARCHAR(100) ,
     createdDateTime DATETIME NOT NULL, 
     updatedDateTime DATETIME ,
     createdBy VARCHAR(20) NOT NULL,
@@ -38,6 +41,10 @@ CREATE TABLE Rights (
 	sysTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+create table RightGroups(
+	right_id INT,
+    right_group VARCHAR(100)
+);
 
 CREATE TABLE EmployeeRequests (
     emp_RequestId INT PRIMARY KEY AUTO_INCREMENT,
@@ -54,9 +61,11 @@ CREATE TABLE EmployeeRequests (
     updatedDateTime DATETIME,
 	createdBy VARCHAR(20) NOT NULL,
     updatedBy VARCHAR(20),
-	sysTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	sysTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    emp_code VARCHAR(10)
 );
 
+describe EmployeeRequests;
 
 CREATE TABLE Employees (
     emp_id INT PRIMARY KEY AUTO_INCREMENT,
